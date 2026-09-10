@@ -2075,8 +2075,130 @@ function submitCall(){
     timeline:[{by:document.getElementById('f-by').value, time:new Date().toISOString(),
       action:'Call Logged', comment:'Initial log: '+selectedStatus}]
   };
-  callData.unshift(r);
-  saveAll();
+  try {
+
+  const customerId = await getCustomerId(r.customer);
+
+  const locationId = await getLocationId(
+    customerId,
+    r.location
+  );
+
+  const userId = await getUserId(
+    r.resource
+  );
+
+  const callNumber =
+    "CALL-" + Date.now();
+
+  const { data, error } =
+    await supabaseClient
+      .from("support_calls")
+      .insert([{
+        call_number: callNumber,
+
+        customer_id: customerId,
+        customer_location_id: locationId,
+
+        customer_name: r.customer,
+        region: r.region,
+        location: r.location,
+
+        amc_status:
+          r.amc === "Yes"
+            ? "AMC"
+            : "NON_AMC",
+
+        customer_contact_name:
+          r.contactName,
+
+        customer_contact_details:
+          r.contactInfo || "",
+
+        issue_description:
+          r.issue,
+
+        jira_ticket_number:
+          r.jira || null,
+
+        reported_date:
+          r.reportDate,
+
+        reported_time:
+          r.reportTime,
+
+        reported_at:
+          new Date().toISOString(),
+
+        first_response_minutes:
+          Number(r.responseTime) || 0,
+
+        primary_resource_id:
+          userId,
+
+        issue_type:
+          r.issueType,
+
+        platform:
+          r.platform,
+
+        system_type:
+          r.systemType,
+
+        software_version:
+          r.version || "NA",
+
+        serial_number:
+          r.serial || null,
+
+        priority:
+          (r.priority || "MEDIUM")
+            .toUpperCase(),
+
+        status:
+          mapStatus(r.status),
+
+        total_hours_worked:
+          Number(r.hours) || 0,
+
+        analysis:
+          r.analysis,
+
+        resolution:
+          r.resolution,
+
+        remarks:
+          r.remarks,
+
+        root_cause:
+          r.rootCause,
+
+        created_by:
+          userId,
+
+        updated_by:
+          userId
+      }]);
+
+  if (error) {
+    throw error;
+  }
+
+  showToast(
+    "✅ Call saved to Supabase",
+    "success"
+  );
+
+}
+catch(err) {
+
+  console.error(err);
+
+  showToast(
+    err.message,
+    "error"
+  );
+}
   rebuildDatalist();
   renderAll();
   resetForm();
