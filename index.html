@@ -2013,7 +2013,65 @@ function clearLogs(){
   AppLogger.clear();
   renderLogs();
 }
+// =============================================
+// SUPABASE HELPERS
+// =============================================
 
+async function getCustomerId(customerName) {
+  const { data, error } = await supabaseClient
+    .from("customers")
+    .select("customer_id")
+    .eq("customer_name", customerName)
+    .limit(1);
+
+  if (error || !data.length) {
+    throw new Error("Customer not found: " + customerName);
+  }
+
+  return data[0].customer_id;
+}
+
+async function getLocationId(customerId, locationName) {
+  const { data, error } = await supabaseClient
+    .from("customer_locations")
+    .select("location_id")
+    .eq("customer_id", customerId)
+    .eq("location_name", locationName)
+    .limit(1);
+
+  if (error || !data.length) {
+    throw new Error("Location not found: " + locationName);
+  }
+
+  return data[0].location_id;
+}
+
+async function getUserId(resourceName) {
+  const { data, error } = await supabaseClient
+    .from("users")
+    .select("user_id")
+    .eq("full_name", resourceName)
+    .limit(1);
+
+  if (error || !data.length) {
+    throw new Error("User not found: " + resourceName);
+  }
+
+  return data[0].user_id;
+}
+
+function mapStatus(status) {
+
+  const map = {
+    "Open": "OPEN",
+    "Closed": "CLOSED",
+    "InProcess": "IN_PROCESS",
+    "Under Observation": "UNDER_OBSERVATION",
+    "Customer Confirmation Pending": "CUSTOMER_CONFIRMATION_PENDING"
+  };
+
+  return map[status] || "OPEN";
+}
 // =============================================
 // FORM — PILLS
 // =============================================
@@ -2215,10 +2273,7 @@ catch(err) {
     "error"
   );
 }
-  rebuildDatalist();
-  renderAll();
-  resetForm();
-  showToast('✅ Call logged!','success');
+
   AppLogger.success('Call logged', {customer:r.customer, status:r.status, resource:r.resource, id:r.id});
   showTab('dashboard');
   document.querySelector('[data-tab="dashboard"]').classList.add('active');
