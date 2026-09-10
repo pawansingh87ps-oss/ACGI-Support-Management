@@ -1841,48 +1841,92 @@ await supabaseClient
   pendingSignup = null;
   showAuth('success');
 }
-function doSignIn(){
-  const username = document.getElementById('si-username').value.trim().toLowerCase();
-  const password = document.getElementById('si-password').value;
-  const shift = document.getElementById('loginShift').value;
-  const errEl = document.getElementById('si-error');
-  errEl.style.display = 'none';
+async function doSignIn(){
 
-  if(!username || !password || !shift){
-    errEl.textContent = 'Please fill in username, password and shift.'; errEl.style.display='block'; return;
-  }
-  const users = loadUsers();
-  const user = users[username];
-  if(!user || user.password !== password){
-    errEl.textContent = 'Invalid username or password.'; errEl.style.display='block';
-    AppLogger.warn('Failed sign-in attempt', {username: username});
-    return;
-  }
-  currentUser = {name:user.name, team:user.designation, shift:shift, username:user.username, isAdmin: !!user.isAdmin};
-  AppLogger.success('User logged in', {name:user.name, username:user.username, designation:user.designation, shift:shift, isAdmin: !!user.isAdmin});
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('appShell').style.display='block';
-  document.getElementById('topAvatar').textContent = user.name.charAt(0).toUpperCase();
-  document.getElementById('topShiftPill').textContent = shift + ' Shift';
-  document.getElementById('topShiftPill').className = 'shift-pill '+shift;
-  document.getElementById('f-by').value = user.name;
-  document.getElementById('f-shift').value = shift;
-  document.getElementById('navRoles').style.display = currentUser.isAdmin ? 'block' : 'none';
-  const now = new Date();
-  document.getElementById('f-date').value = datStr(now);
-  document.getElementById('f-time').value = now.toTimeString().slice(0,5);
-  document.getElementById('f-rdate').value = datStr(now);
-  document.getElementById('f-rtime').value = now.toTimeString().slice(0,5);
-  loadCallsFromSupabase();
-  loadProfile();
-  renderAll();
-  updateClock();
-  setInterval(updateClock, 1000);
-  setInterval(checkOpenCallsAlert, 5000);
-  checkOpenCallsAlert();
-  setTimeout(()=>{
-    if(getOpenCalls().length>0) showAlertPanel();
-  },2000);
+   const username =
+      document.getElementById(
+         "si-username"
+      ).value.trim().toLowerCase();
+
+   const password =
+      document.getElementById(
+         "si-password"
+      ).value;
+
+   try{
+
+      const passwordHash =
+         await hashPassword(password);
+
+      const { data, error } =
+         await supabaseClient
+          .from("users")
+          .select("*")
+          .eq("username", username)
+          .eq("password_hash", passwordHash)
+          .single();
+
+      if(error || !data){
+          throw new Error(
+            "Invalid username or password"
+          );
+      }
+
+      currentUser = {
+
+        id: data.user_id,
+
+        username: data.username,
+
+        email: data.email,
+
+        name: data.username
+
+      };
+
+      document.getElementById(
+         "loginScreen"
+      ).style.display = "none";
+
+      document.getElementById(
+         "appShell"
+      ).style.display = "block";
+
+      loadCallsFromSupabase();
+
+      showToast(
+         "Login successful",
+         "success"
+      );
+
+   }
+   catch(err){
+
+      showToast(
+         err.message,
+         "error"
+      );
+   }
+}
+async function loadCallsFromSupabase(){
+
+   const { data, error } =
+     await supabaseClient
+      .from("support_calls")
+      .select("*")
+      .order(
+         "reported_at",
+         { ascending:false }
+       );
+
+   if(error){
+      console.error(error);
+      return;
+   }
+
+   callData = data || [];
+
+   renderAll();
 }
 function doLogout(){
   AppLogger.info('User logged out', currentUser ? {name:currentUser.name, username:currentUser.username} : null);
