@@ -1796,7 +1796,7 @@ function doSignIn(){
   document.getElementById('f-time').value = now.toTimeString().slice(0,5);
   document.getElementById('f-rdate').value = datStr(now);
   document.getElementById('f-rtime').value = now.toTimeString().slice(0,5);
-  loadAll();
+  loadCallsFromSupabase();
   loadProfile();
   renderAll();
   updateClock();
