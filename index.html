@@ -1699,46 +1699,125 @@ function onDesignationChange(){
   const v = document.getElementById('su-designation').value;
   document.getElementById('su-deptWrap').style.display = v==='Others' ? 'block' : 'none';
 }
+  async function hashPassword(password){
+
+    const msgUint8 =
+      new TextEncoder()
+      .encode(password);
+
+    const hashBuffer =
+      await crypto.subtle.digest(
+        "SHA-256",
+        msgUint8
+      );
+
+    const hashArray =
+      Array.from(
+        new Uint8Array(hashBuffer)
+      );
+
+    return hashArray
+      .map(b =>
+         b.toString(16)
+          .padStart(2,'0'))
+      .join('');
+}
+  async function createSupabaseUser(
+    name,
+    email,
+    mobile,
+    username,
+    password,
+    designation
+){
+
+   try{
+
+      const passwordHash =
+          await hashPassword(password);
+
+      const { error } =
+       await supabaseClient
+        .from("users")
+        .insert([{
+
+          username: username,
+
+          email: email,
+
+          phone_number: mobile,
+
+          password_hash: passwordHash,
+
+          is_active: true
+
+        }]);
+
+      if(error){
+         throw error;
+      }
+
+      showToast(
+        "User created successfully",
+        "success"
+      );
+
+      showAuth("signin");
+
+   }catch(err){
+
+      console.error(err);
+
+      showToast(
+        err.message,
+        "error"
+      );
+   }
+}
 function doSignUp(){
-  const name = document.getElementById('su-name').value.trim();
-  const email = document.getElementById('su-email').value.trim();
-  const mobile = document.getElementById('su-mobile').value.trim();
-  const username = document.getElementById('su-username').value.trim().toLowerCase();
-  const password = document.getElementById('su-password').value;
-  const designationSel = document.getElementById('su-designation').value;
-  const department = document.getElementById('su-department').value.trim();
-  const errEl = document.getElementById('su-error');
+
+  const name =
+    document.getElementById('su-name').value.trim();
+
+  const email =
+    document.getElementById('su-email').value.trim();
+
+  const mobile =
+    document.getElementById('su-mobile').value.trim();
+
+  const username =
+    document.getElementById('su-username')
+      .value.trim()
+      .toLowerCase();
+
+  const password =
+    document.getElementById('su-password').value;
+
+  const designation =
+    document.getElementById('su-designation').value;
+
+  const errEl =
+    document.getElementById('su-error');
+
   errEl.style.display = 'none';
 
-  if(!name || !email || !mobile || !username || !password || !designationSel){
-    errEl.textContent = 'Please fill in all fields.'; errEl.style.display='block'; return;
-  }
-  if(designationSel==='Others' && !department){
-    errEl.textContent = 'Please enter your department.'; errEl.style.display='block'; return;
-  }
-  if(!/^\d{10}$/.test(mobile)){
-    errEl.textContent = 'Please enter a valid 10-digit mobile number.'; errEl.style.display='block'; return;
-  }
-  const users = loadUsers();
-  if(users[username]){
-    errEl.textContent = 'That username is already taken. Please choose another.'; errEl.style.display='block'; return;
+  if(!name || !email || !mobile || !username || !password){
+      errEl.textContent =
+        "Fill all required fields";
+      errEl.style.display='block';
+      return;
   }
 
-  const otp = String(Math.floor(100000 + Math.random()*900000));
-  pendingSignup = {
-    name, email, mobile, username, password,
-    designation: designationSel==='Others' ? department : designationSel,
-    isOtherDept: designationSel==='Others',
-    otp
-  };
-  document.getElementById('otp-mobile-display').textContent = mobile.replace(/^(\d{2})\d{6}(\d{2})$/,'$1••••••$2');
-  document.getElementById('otp-demo-code').textContent = otp;
-  document.getElementById('otp-input').value = '';
-  document.getElementById('otp-error').style.display='none';
-  AppLogger.info('OTP generated for sign-up', {username: username, mobile: mobile});
-  showAuth('otp');
+  createSupabaseUser(
+      name,
+      email,
+      mobile,
+      username,
+      password,
+      designation
+  );
 }
-function verifyOtp(){
+  function verifyOtp(){
   const entered = document.getElementById('otp-input').value.trim();
   const errEl = document.getElementById('otp-error');
   if(!pendingSignup){ showAuth('signup'); return; }
@@ -1747,19 +1826,17 @@ function verifyOtp(){
     AppLogger.warn('OTP verification failed', {username: pendingSignup.username});
     return;
   }
-  const users = loadUsers();
-  const isAdmin = pendingSignup.name.trim().toLowerCase() === 'pawan';
-  users[pendingSignup.username] = {
-    name: pendingSignup.name,
+await supabaseClient
+.from("users")
+.insert([{
+    user_id: pendingSignup.userId,
+    full_name: pendingSignup.fullName,
     email: pendingSignup.email,
-    mobile: pendingSignup.mobile,
-    username: pendingSignup.username,
-    password: pendingSignup.password,
-    designation: pendingSignup.designation,
-    isAdmin: isAdmin,
-    createdAt: new Date().toISOString()
-  };
-  saveUsers(users);
+    mobile_number: pendingSignup.mobile,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+}]);
+
   AppLogger.success('New account created', {username: pendingSignup.username, name: pendingSignup.name, designation: pendingSignup.designation, isAdmin});
   pendingSignup = null;
   showAuth('success');
