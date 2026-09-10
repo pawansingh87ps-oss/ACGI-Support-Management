@@ -1868,7 +1868,23 @@ function makeAdmin(uname){
 // DATA
 // =============================================
 function loadAll(){
-  callData = JSON.parse(localStorage.getItem(SK)||'[]');
+  async function loadCallsFromSupabase() {
+
+  const { data, error } =
+    await supabaseClient
+      .from("support_calls")
+      .select("*")
+      .order("reported_at",
+             { ascending:false });
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  callData = data;
+  renderAll();
+}
   sops = JSON.parse(localStorage.getItem(SOK)||'[]');
 }
 function saveAll(){
