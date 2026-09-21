@@ -77,6 +77,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .role-table select{padding:6px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px}
 .role-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:800;text-transform:uppercase;background:linear-gradient(135deg,var(--gold),#f39c12);color:#fff}
 .role-empty{text-align:center;padding:40px;color:var(--muted)}
+.submenu-tabs{display:flex;border-bottom:1px solid var(--border);background:#fafbfe}
+.submenu-tab{padding:14px 22px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:all .15s}
+.submenu-tab:hover{color:var(--dark)}
+.submenu-tab.active{color:var(--red);border-bottom-color:var(--red);background:#fff}
+.submenu-panel{display:none}
+.submenu-panel.active{display:block}
+.rights-check{width:18px;height:18px;cursor:pointer;accent-color:var(--red)}
 
 /* ===TOPBAR=== */
 .topbar{
@@ -645,6 +652,16 @@ tr:hover td{background:#f8f9ff}
           <label>Your Department</label>
           <input type="text" id="su-department" placeholder="Enter your department">
         </div>
+        <div class="fg">
+          <label>Access Role</label>
+          <select id="su-role">
+            <option value="">— Select access role —</option>
+            <option value="Engineer">Engineer</option>
+            <option value="Manager">Manager</option>
+            <option value="HOD">HOD</option>
+          </select>
+          <div class="hint" style="font-size:10px;color:var(--muted);margin-top:4px">This controls which modules you can access in the portal. Your admin can change this later.</div>
+        </div>
         <div class="fg" id="su-error" style="display:none;color:var(--red);font-size:12px;font-weight:700"></div>
         <button class="btn-login" onclick="doSignUp()">Save →</button>
         <div class="login-footer"><a href="javascript:void(0)" onclick="showAuth('landing')">← Back</a> &nbsp;·&nbsp; <a href="javascript:void(0)" onclick="showAuth('signin')">Already have an account? Sign In</a></div>
@@ -755,7 +772,7 @@ tr:hover td{background:#f8f9ff}
       <span class="ni">🧾</span> System Logs
     </div>
     <div class="nav-item" data-tab="roles" id="navRoles" style="display:none" onclick="showTab('roles',this)">
-      <span class="ni">🛡️</span> User Roles <span style="font-size:9px;background:var(--gold);color:#fff;padding:1px 6px;border-radius:100px;margin-left:4px">ADMIN</span>
+      <span class="ni">🛡️</span> Roles <span style="font-size:9px;background:var(--gold);color:#fff;padding:1px 6px;border-radius:100px;margin-left:4px">ADMIN</span>
     </div>
     <div class="nav-item" data-tab="about" onclick="showTab('about',this)">
       <span class="ni">ℹ️</span> About
@@ -1450,18 +1467,39 @@ tr:hover td{background:#f8f9ff}
     <!-- ===USER ROLES (ADMIN ONLY)=== -->
     <div id="tab-roles" class="tab">
       <div class="ph">
-        <h2>🛡️ User Roles & Access</h2>
-        <p>Admin-only. Assign or change any registered team member's designation/role. Visible only to Pawan (admin).</p>
+        <h2>🛡️ Roles</h2>
+        <p>Admin-only module. Assign access roles to team members and configure which modules each role can see.</p>
       </div>
-      <div class="card">
-        <div style="margin-bottom:14px;padding:12px 14px;background:#fff8f0;border-radius:10px;border-left:4px solid var(--gold);font-size:12px">
-          💡 Changing a role here updates the person's designation for their next login. It does not affect their current active session.
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="submenu-tabs">
+          <div class="submenu-tab active" id="rolesSubtab-roles" onclick="showRolesSubtab('roles')">👤 Roles</div>
+          <div class="submenu-tab" id="rolesSubtab-rights" onclick="showRolesSubtab('rights')">🔐 Rights</div>
         </div>
-        <div class="role-table-wrap">
-          <table class="role-table">
-            <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Mobile</th><th style="width:260px">Designation / Role</th><th style="width:90px">Admin</th></tr></thead>
-            <tbody id="roleTableBody"></tbody>
-          </table>
+
+        <!-- ROLES SUB-TAB -->
+        <div class="submenu-panel active" id="rolesPanel-roles" style="padding:20px">
+          <div style="margin-bottom:14px;padding:12px 14px;background:#fff8f0;border-radius:10px;border-left:4px solid var(--gold);font-size:12px">
+            💡 Assign each team member an <strong>Access Role</strong> (Engineer / Manager / HOD) — this controls which modules they can see, based on the Rights tab. Changes apply from their next login. Initially only Pawan is admin; use "Make Admin" to let others manage this module too.
+          </div>
+          <div class="role-table-wrap">
+            <table class="role-table">
+              <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Mobile</th><th style="width:170px">Access Role</th><th style="width:220px">Designation</th><th style="width:90px">Admin</th></tr></thead>
+              <tbody id="roleTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- RIGHTS SUB-TAB -->
+        <div class="submenu-panel" id="rolesPanel-rights" style="padding:20px">
+          <div style="margin-bottom:14px;padding:12px 14px;background:#fff8f0;border-radius:10px;border-left:4px solid var(--gold);font-size:12px">
+            💡 Tick which modules each Access Role can view. <strong>HOD</strong> and <strong>Manager</strong> default to full access. <strong>Engineer</strong> defaults to no access on Dashboard and Performance. Changes apply from the affected users' next login.
+          </div>
+          <div class="role-table-wrap">
+            <table class="role-table" id="rightsTable">
+              <thead><tr><th>Module</th><th style="width:110px;text-align:center">Engineer</th><th style="width:110px;text-align:center">Manager</th><th style="width:110px;text-align:center">HOD</th></tr></thead>
+              <tbody id="rightsTableBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -1676,10 +1714,30 @@ const COLORS = ['#E8003D','#00c9c8','#f5a623','#2ecc71','#9b59b6','#3498db','#e6
 // INDIVIDUAL LOGIN / SIGNUP / OTP / ROLES
 // =============================================
 const USERS_KEY = 'acgi_users';
-const ROLE_OPTIONS = [
+const RIGHTS_KEY = 'acgi_role_rights';
+const DESIGNATION_OPTIONS = [
   'Service Engineer','Service Region Team Lead','QA Engineer','QA Team Lead',
   'QA Manager / Head','Service Manager / Head','Operations Head'
 ];
+const ACCESS_ROLES = ['Engineer','Manager','HOD'];
+const MODULE_LIST = [
+  {key:'dashboard', label:'📊 Dashboard'},
+  {key:'callLog', label:'📞 Log a Call'},
+  {key:'allCalls', label:'📋 All Calls'},
+  {key:'openCalls', label:'🔴 Open / In-Process'},
+  {key:'champion', label:'🏆 Champions'},
+  {key:'performance', label:'📈 Performance'},
+  {key:'sops', label:'📄 SOPs'},
+  {key:'nonAmc', label:'⚠️ Non-AMC Follow-up'},
+  {key:'repeatedIssues', label:'🔁 Repeated Issues'},
+  {key:'pmFollowup', label:'🛠 PM Follow-up'},
+  {key:'feedback', label:'💬 Team Feedback'}
+];
+function defaultRights(){
+  const engineer = {}; MODULE_LIST.forEach(m=>engineer[m.key] = (m.key!=='dashboard' && m.key!=='performance'));
+  const full = {}; MODULE_LIST.forEach(m=>full[m.key] = true);
+  return {Engineer:engineer, Manager:Object.assign({},full), HOD:Object.assign({},full)};
+}
 let pendingSignup = null;
 
 function loadUsers(){
@@ -1690,6 +1748,36 @@ function saveUsers(users){
   try{ localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
   catch(e){ AppLogger.error('Failed to persist users', {message:e.message}); }
 }
+function loadRights(){
+  let stored = {};
+  try{ stored = JSON.parse(localStorage.getItem(RIGHTS_KEY) || '{}'); }
+  catch(e){ stored = {}; }
+  const merged = defaultRights();
+  ACCESS_ROLES.forEach(r=>{
+    if(stored[r]) Object.assign(merged[r], stored[r]);
+  });
+  return merged;
+}
+function saveRights(rights){
+  try{ localStorage.setItem(RIGHTS_KEY, JSON.stringify(rights)); }
+  catch(e){ AppLogger.error('Failed to persist role rights', {message:e.message}); }
+}
+function canAccessModule(moduleKey){
+  if(!currentUser) return false;
+  if(currentUser.isAdmin) return true;
+  if(!MODULE_LIST.some(m=>m.key===moduleKey)) return true; // ungoverned tabs (profile/logs/roles/about) always allowed
+  const rights = loadRights();
+  const roleRights = rights[currentUser.role];
+  if(!roleRights) return true;
+  return roleRights[moduleKey] !== false;
+}
+function applyRoleAccess(){
+  if(!currentUser) return;
+  MODULE_LIST.forEach(m=>{
+    const ni = document.querySelector('[data-tab="'+m.key+'"]');
+    if(ni) ni.style.display = canAccessModule(m.key) ? '' : 'none';
+  });
+}
 function showAuth(view){
   document.querySelectorAll('.auth-view').forEach(v=>v.classList.remove('active'));
   const el = document.getElementById('av-'+view);
@@ -1699,125 +1787,47 @@ function onDesignationChange(){
   const v = document.getElementById('su-designation').value;
   document.getElementById('su-deptWrap').style.display = v==='Others' ? 'block' : 'none';
 }
-  async function hashPassword(password){
-
-    const msgUint8 =
-      new TextEncoder()
-      .encode(password);
-
-    const hashBuffer =
-      await crypto.subtle.digest(
-        "SHA-256",
-        msgUint8
-      );
-
-    const hashArray =
-      Array.from(
-        new Uint8Array(hashBuffer)
-      );
-
-    return hashArray
-      .map(b =>
-         b.toString(16)
-          .padStart(2,'0'))
-      .join('');
-}
-  async function createSupabaseUser(
-    name,
-    email,
-    mobile,
-    username,
-    password,
-    designation
-){
-
-   try{
-
-      const passwordHash =
-          await hashPassword(password);
-
-      const { error } =
-       await supabaseClient
-        .from("users")
-        .insert([{
-
-          username: username,
-
-          email: email,
-
-          phone_number: mobile,
-
-          password_hash: passwordHash,
-
-          is_active: true
-
-        }]);
-
-      if(error){
-         throw error;
-      }
-
-      showToast(
-        "User created successfully",
-        "success"
-      );
-
-      showAuth("signin");
-
-   }catch(err){
-
-      console.error(err);
-
-      showToast(
-        err.message,
-        "error"
-      );
-   }
-}
 function doSignUp(){
-
-  const name =
-    document.getElementById('su-name').value.trim();
-
-  const email =
-    document.getElementById('su-email').value.trim();
-
-  const mobile =
-    document.getElementById('su-mobile').value.trim();
-
-  const username =
-    document.getElementById('su-username')
-      .value.trim()
-      .toLowerCase();
-
-  const password =
-    document.getElementById('su-password').value;
-
-  const designation =
-    document.getElementById('su-designation').value;
-
-  const errEl =
-    document.getElementById('su-error');
-
+  const name = document.getElementById('su-name').value.trim();
+  const email = document.getElementById('su-email').value.trim();
+  const mobile = document.getElementById('su-mobile').value.trim();
+  const username = document.getElementById('su-username').value.trim().toLowerCase();
+  const password = document.getElementById('su-password').value;
+  const designationSel = document.getElementById('su-designation').value;
+  const department = document.getElementById('su-department').value.trim();
+  const role = document.getElementById('su-role').value;
+  const errEl = document.getElementById('su-error');
   errEl.style.display = 'none';
 
-  if(!name || !email || !mobile || !username || !password){
-      errEl.textContent =
-        "Fill all required fields";
-      errEl.style.display='block';
-      return;
+  if(!name || !email || !mobile || !username || !password || !designationSel || !role){
+    errEl.textContent = 'Please fill in all fields, including Access Role.'; errEl.style.display='block'; return;
+  }
+  if(designationSel==='Others' && !department){
+    errEl.textContent = 'Please enter your department.'; errEl.style.display='block'; return;
+  }
+  if(!/^\d{10}$/.test(mobile)){
+    errEl.textContent = 'Please enter a valid 10-digit mobile number.'; errEl.style.display='block'; return;
+  }
+  const users = loadUsers();
+  if(users[username]){
+    errEl.textContent = 'That username is already taken. Please choose another.'; errEl.style.display='block'; return;
   }
 
-  createSupabaseUser(
-      name,
-      email,
-      mobile,
-      username,
-      password,
-      designation
-  );
+  const otp = String(Math.floor(100000 + Math.random()*900000));
+  pendingSignup = {
+    name, email, mobile, username, password, role,
+    designation: designationSel==='Others' ? department : designationSel,
+    isOtherDept: designationSel==='Others',
+    otp
+  };
+  document.getElementById('otp-mobile-display').textContent = mobile.replace(/^(\d{2})\d{6}(\d{2})$/,'$1••••••$2');
+  document.getElementById('otp-demo-code').textContent = otp;
+  document.getElementById('otp-input').value = '';
+  document.getElementById('otp-error').style.display='none';
+  AppLogger.info('OTP generated for sign-up', {username: username, mobile: mobile, role: role});
+  showAuth('otp');
 }
-  function verifyOtp(){
+function verifyOtp(){
   const entered = document.getElementById('otp-input').value.trim();
   const errEl = document.getElementById('otp-error');
   if(!pendingSignup){ showAuth('signup'); return; }
@@ -1826,107 +1836,71 @@ function doSignUp(){
     AppLogger.warn('OTP verification failed', {username: pendingSignup.username});
     return;
   }
-await supabaseClient
-.from("users")
-.insert([{
-    user_id: pendingSignup.userId,
-    full_name: pendingSignup.fullName,
+  const users = loadUsers();
+  const isAdmin = pendingSignup.name.trim().toLowerCase() === 'pawan';
+  users[pendingSignup.username] = {
+    name: pendingSignup.name,
     email: pendingSignup.email,
-    mobile_number: pendingSignup.mobile,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-}]);
-
-  AppLogger.success('New account created', {username: pendingSignup.username, name: pendingSignup.name, designation: pendingSignup.designation, isAdmin});
+    mobile: pendingSignup.mobile,
+    username: pendingSignup.username,
+    password: pendingSignup.password,
+    designation: pendingSignup.designation,
+    role: pendingSignup.role,
+    isAdmin: isAdmin,
+    createdAt: new Date().toISOString()
+  };
+  saveUsers(users);
+  AppLogger.success('New account created', {username: pendingSignup.username, name: pendingSignup.name, designation: pendingSignup.designation, role: pendingSignup.role, isAdmin});
   pendingSignup = null;
   showAuth('success');
 }
-async function doSignIn(){
+function doSignIn(){
+  const username = document.getElementById('si-username').value.trim().toLowerCase();
+  const password = document.getElementById('si-password').value;
+  const shift = document.getElementById('loginShift').value;
+  const errEl = document.getElementById('si-error');
+  errEl.style.display = 'none';
 
-   const username =
-      document.getElementById(
-         "si-username"
-      ).value.trim().toLowerCase();
-
-   const password =
-      document.getElementById(
-         "si-password"
-      ).value;
-
-   try{
-
-      const passwordHash =
-         await hashPassword(password);
-
-      const { data, error } =
-         await supabaseClient
-          .from("users")
-          .select("*")
-          .eq("username", username)
-          .eq("password_hash", passwordHash)
-          .single();
-
-      if(error || !data){
-          throw new Error(
-            "Invalid username or password"
-          );
-      }
-
-      currentUser = {
-
-        id: data.user_id,
-
-        username: data.username,
-
-        email: data.email,
-
-        name: data.username
-
-      };
-
-      document.getElementById(
-         "loginScreen"
-      ).style.display = "none";
-
-      document.getElementById(
-         "appShell"
-      ).style.display = "block";
-
-      loadCallsFromSupabase();
-
-      showToast(
-         "Login successful",
-         "success"
-      );
-
-   }
-   catch(err){
-
-      showToast(
-         err.message,
-         "error"
-      );
-   }
-}
-async function loadCallsFromSupabase(){
-
-   const { data, error } =
-     await supabaseClient
-      .from("support_calls")
-      .select("*")
-      .order(
-         "reported_at",
-         { ascending:false }
-       );
-
-   if(error){
-      console.error(error);
-      return;
-   }
-
-   callData = data || [];
-
-   renderAll();
+  if(!username || !password || !shift){
+    errEl.textContent = 'Please fill in username, password and shift.'; errEl.style.display='block'; return;
+  }
+  const users = loadUsers();
+  const user = users[username];
+  if(!user || user.password !== password){
+    errEl.textContent = 'Invalid username or password.'; errEl.style.display='block';
+    AppLogger.warn('Failed sign-in attempt', {username: username});
+    return;
+  }
+  currentUser = {name:user.name, team:user.designation, shift:shift, username:user.username, isAdmin: !!user.isAdmin, role: user.role || 'Engineer'};
+  AppLogger.success('User logged in', {name:user.name, username:user.username, designation:user.designation, role:currentUser.role, shift:shift, isAdmin: !!user.isAdmin});
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appShell').style.display='block';
+  document.getElementById('topAvatar').textContent = user.name.charAt(0).toUpperCase();
+  document.getElementById('topShiftPill').textContent = shift + ' Shift';
+  document.getElementById('topShiftPill').className = 'shift-pill '+shift;
+  document.getElementById('f-by').value = user.name;
+  document.getElementById('f-shift').value = shift;
+  document.getElementById('navRoles').style.display = currentUser.isAdmin ? 'block' : 'none';
+  applyRoleAccess();
+  const now = new Date();
+  document.getElementById('f-date').value = datStr(now);
+  document.getElementById('f-time').value = now.toTimeString().slice(0,5);
+  document.getElementById('f-rdate').value = datStr(now);
+  document.getElementById('f-rtime').value = now.toTimeString().slice(0,5);
+  loadAll();
+  loadProfile();
+  renderAll();
+  updateClock();
+  setInterval(updateClock, 1000);
+  setInterval(checkOpenCallsAlert, 5000);
+  checkOpenCallsAlert();
+  setTimeout(()=>{
+    if(getOpenCalls().length>0) showAlertPanel();
+  },2000);
+  if(!canAccessModule('dashboard')){
+    const firstAllowed = MODULE_LIST.find(m=>canAccessModule(m.key));
+    if(firstAllowed) showTab(firstAllowed.key);
+  }
 }
 function doLogout(){
   AppLogger.info('User logged out', currentUser ? {name:currentUser.name, username:currentUser.username} : null);
@@ -1937,11 +1911,19 @@ function doLogout(){
 }
 
 // =============================================
-// USER ROLES (ADMIN ONLY)
+// ROLES MODULE (ADMIN ONLY) — Roles & Rights sub-tabs
 // =============================================
+function showRolesSubtab(which){
+  document.querySelectorAll('.submenu-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.submenu-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('rolesSubtab-'+which).classList.add('active');
+  document.getElementById('rolesPanel-'+which).classList.add('active');
+  if(which==='roles') renderRoles();
+  if(which==='rights') renderRights();
+}
 function renderRoles(){
   if(!currentUser || !currentUser.isAdmin){
-    showToast('Only admin (Pawan) can access User Roles', 'error');
+    showToast('Only admin (Pawan) can access the Roles module', 'error');
     showTab('dashboard');
     return;
   }
@@ -1949,31 +1931,41 @@ function renderRoles(){
   const body = document.getElementById('roleTableBody');
   const usernames = Object.keys(users);
   if(!usernames.length){
-    body.innerHTML = '<tr><td colspan="6" class="role-empty">No registered users yet.</td></tr>';
+    body.innerHTML = '<tr><td colspan="7" class="role-empty">No registered users yet.</td></tr>';
     return;
   }
   body.innerHTML = usernames.map(uname=>{
     const u = users[uname];
-    const opts = ROLE_OPTIONS.map(r=>`<option value="${r}" ${u.designation===r?'selected':''}>${r}</option>`).join('');
-    const customOpt = ROLE_OPTIONS.includes(u.designation) ? '' : `<option value="${u.designation}" selected>${u.designation} (custom)</option>`;
+    const roleOpts = ACCESS_ROLES.map(r=>`<option value="${r}" ${(u.role||'Engineer')===r?'selected':''}>${r}</option>`).join('');
+    const desigOpts = DESIGNATION_OPTIONS.map(r=>`<option value="${r}" ${u.designation===r?'selected':''}>${r}</option>`).join('');
+    const desigCustom = DESIGNATION_OPTIONS.includes(u.designation) ? '' : `<option value="${u.designation}" selected>${u.designation} (custom)</option>`;
     const adminBadge = u.isAdmin ? '<span class="role-badge">Admin</span>' : `<button class="btn-secondary" style="font-size:11px;padding:4px 10px" onclick="makeAdmin('${uname}')">Make Admin</button>`;
     return `<tr>
       <td>${u.name}</td>
       <td>${u.username}</td>
       <td>${u.email||'—'}</td>
       <td>${u.mobile||'—'}</td>
-      <td><select onchange="saveRole('${uname}', this.value)">${customOpt}${opts}</select></td>
+      <td><select onchange="saveAccessRole('${uname}', this.value)">${roleOpts}</select></td>
+      <td><select onchange="saveDesignation('${uname}', this.value)">${desigCustom}${desigOpts}</select></td>
       <td>${adminBadge}</td>
     </tr>`;
   }).join('');
 }
-function saveRole(uname, newRole){
+function saveAccessRole(uname, newRole){
   const users = loadUsers();
   if(!users[uname]) return;
-  users[uname].designation = newRole;
+  users[uname].role = newRole;
   saveUsers(users);
-  showToast('Role updated for '+users[uname].name, 'success');
-  AppLogger.success('User role updated by admin', {admin: currentUser.username, target: uname, newRole: newRole});
+  showToast('Access role updated for '+users[uname].name, 'success');
+  AppLogger.success('User access role updated by admin', {admin: currentUser.username, target: uname, newRole: newRole});
+}
+function saveDesignation(uname, newDesig){
+  const users = loadUsers();
+  if(!users[uname]) return;
+  users[uname].designation = newDesig;
+  saveUsers(users);
+  showToast('Designation updated for '+users[uname].name, 'success');
+  AppLogger.success('User designation updated by admin', {admin: currentUser.username, target: uname, newDesignation: newDesig});
 }
 function makeAdmin(uname){
   const users = loadUsers();
@@ -1984,28 +1976,35 @@ function makeAdmin(uname){
   renderRoles();
   AppLogger.success('Admin access granted', {admin: currentUser.username, target: uname});
 }
+function renderRights(){
+  if(!currentUser || !currentUser.isAdmin){
+    showToast('Only admin (Pawan) can access the Roles module', 'error');
+    showTab('dashboard');
+    return;
+  }
+  const rights = loadRights();
+  const body = document.getElementById('rightsTableBody');
+  body.innerHTML = MODULE_LIST.map(m=>{
+    const cells = ACCESS_ROLES.map(role=>{
+      const checked = rights[role][m.key] !== false;
+      return `<td style="text-align:center"><input type="checkbox" class="rights-check" ${checked?'checked':''} onchange="saveRight('${role}','${m.key}',this.checked)"></td>`;
+    }).join('');
+    return `<tr><td>${m.label}</td>${cells}</tr>`;
+  }).join('');
+}
+function saveRight(role, moduleKey, checked){
+  const rights = loadRights();
+  rights[role][moduleKey] = checked;
+  saveRights(rights);
+  showToast(role+' access to "'+moduleKey+'" '+(checked?'enabled':'disabled'), 'success');
+  AppLogger.success('Module right updated by admin', {admin: currentUser.username, role: role, module: moduleKey, allowed: checked});
+}
 
 // =============================================
 // DATA
 // =============================================
 function loadAll(){
-  async function loadCallsFromSupabase() {
-
-  const { data, error } =
-    await supabaseClient
-      .from("support_calls")
-      .select("*")
-      .order("reported_at",
-             { ascending:false });
-
-  if(error){
-    console.error(error);
-    return;
-  }
-
-  callData = data;
-  renderAll();
-}
+  callData = JSON.parse(localStorage.getItem(SK)||'[]');
   sops = JSON.parse(localStorage.getItem(SOK)||'[]');
 }
 function saveAll(){
@@ -2074,6 +2073,11 @@ function updateClock(){
   document.getElementById('topDate').textContent=now.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
 }
 function showTab(tab, el){
+  if(currentUser && MODULE_LIST.some(m=>m.key===tab) && !canAccessModule(tab)){
+    showToast('Your access role does not permit this module', 'error');
+    AppLogger.warn('Blocked navigation to restricted module', {tab: tab, role: currentUser.role});
+    return;
+  }
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
@@ -2087,7 +2091,7 @@ function showTab(tab, el){
   if(tab==='nonAmc') renderNonAmc();
   if(tab==='sops') renderSOPs();
   if(tab==='logs') renderLogs();
-  if(tab==='roles') renderRoles();
+  if(tab==='roles') showRolesSubtab('roles');
   if(tab==='feedback'){
     const nameEl=document.getElementById('tl-name');
     if(nameEl && !nameEl.value && currentUser) nameEl.value = currentUser.name;
@@ -2134,65 +2138,7 @@ function clearLogs(){
   AppLogger.clear();
   renderLogs();
 }
-// =============================================
-// SUPABASE HELPERS
-// =============================================
 
-async function getCustomerId(customerName) {
-  const { data, error } = await supabaseClient
-    .from("customers")
-    .select("customer_id")
-    .eq("customer_name", customerName)
-    .limit(1);
-
-  if (error || !data.length) {
-    throw new Error("Customer not found: " + customerName);
-  }
-
-  return data[0].customer_id;
-}
-
-async function getLocationId(customerId, locationName) {
-  const { data, error } = await supabaseClient
-    .from("customer_locations")
-    .select("location_id")
-    .eq("customer_id", customerId)
-    .eq("location_name", locationName)
-    .limit(1);
-
-  if (error || !data.length) {
-    throw new Error("Location not found: " + locationName);
-  }
-
-  return data[0].location_id;
-}
-
-async function getUserId(resourceName) {
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("user_id")
-    .eq("full_name", resourceName)
-    .limit(1);
-
-  if (error || !data.length) {
-    throw new Error("User not found: " + resourceName);
-  }
-
-  return data[0].user_id;
-}
-
-function mapStatus(status) {
-
-  const map = {
-    "Open": "OPEN",
-    "Closed": "CLOSED",
-    "InProcess": "IN_PROCESS",
-    "Under Observation": "UNDER_OBSERVATION",
-    "Customer Confirmation Pending": "CUSTOMER_CONFIRMATION_PENDING"
-  };
-
-  return map[status] || "OPEN";
-}
 // =============================================
 // FORM — PILLS
 // =============================================
@@ -2270,131 +2216,12 @@ function submitCall(){
     timeline:[{by:document.getElementById('f-by').value, time:new Date().toISOString(),
       action:'Call Logged', comment:'Initial log: '+selectedStatus}]
   };
-  try {
-
-  const customerId = await getCustomerId(r.customer);
-
-  const locationId = await getLocationId(
-    customerId,
-    r.location
-  );
-
-  const userId = await getUserId(
-    r.resource
-  );
-
-  const callNumber =
-    "CALL-" + Date.now();
-
-  const { data, error } =
-    await supabaseClient
-      .from("support_calls")
-      .insert([{
-        call_number: callNumber,
-
-        customer_id: customerId,
-        customer_location_id: locationId,
-
-        customer_name: r.customer,
-        region: r.region,
-        location: r.location,
-
-        amc_status:
-          r.amc === "Yes"
-            ? "AMC"
-            : "NON_AMC",
-
-        customer_contact_name:
-          r.contactName,
-
-        customer_contact_details:
-          r.contactInfo || "",
-
-        issue_description:
-          r.issue,
-
-        jira_ticket_number:
-          r.jira || null,
-
-        reported_date:
-          r.reportDate,
-
-        reported_time:
-          r.reportTime,
-
-        reported_at:
-          new Date().toISOString(),
-
-        first_response_minutes:
-          Number(r.responseTime) || 0,
-
-        primary_resource_id:
-          userId,
-
-        issue_type:
-          r.issueType,
-
-        platform:
-          r.platform,
-
-        system_type:
-          r.systemType,
-
-        software_version:
-          r.version || "NA",
-
-        serial_number:
-          r.serial || null,
-
-        priority:
-          (r.priority || "MEDIUM")
-            .toUpperCase(),
-
-        status:
-          mapStatus(r.status),
-
-        total_hours_worked:
-          Number(r.hours) || 0,
-
-        analysis:
-          r.analysis,
-
-        resolution:
-          r.resolution,
-
-        remarks:
-          r.remarks,
-
-        root_cause:
-          r.rootCause,
-
-        created_by:
-          userId,
-
-        updated_by:
-          userId
-      }]);
-
-  if (error) {
-    throw error;
-  }
-
-  showToast(
-    "✅ Call saved to Supabase",
-    "success"
-  );
-
-}
-catch(err) {
-
-  console.error(err);
-
-  showToast(
-    err.message,
-    "error"
-  );
-}
-
+  callData.unshift(r);
+  saveAll();
+  rebuildDatalist();
+  renderAll();
+  resetForm();
+  showToast('✅ Call logged!','success');
   AppLogger.success('Call logged', {customer:r.customer, status:r.status, resource:r.resource, id:r.id});
   showTab('dashboard');
   document.querySelector('[data-tab="dashboard"]').classList.add('active');
@@ -3259,18 +3086,6 @@ async function retrySubmit() {
 
 // Build the feedback module's UI once at application start
 initFeedbackModule();
-https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2script>
-
-<script>
-const supabaseUrl = "https://vljmvapzijnbcztdclio.supabase.co/rest/v1/";
-const supabaseKey = "sb_publishable_twI3jtpWc4URRC2IfwX3pg_SJ-EDlpw";
-
-const supabaseClient = supabase.createClient(
-  supabaseUrl,
-  supabaseKey
-);
-
-console.log("Supabase Connected");
 </script>
 </body>
 </html>
