@@ -7,6 +7,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<!-- Supabase (shared backend for the pilot — see deployment guide for setup) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --red:#E8003D;--red2:#c00030;--red-light:#fff0f4;
@@ -77,6 +79,22 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .role-table select{padding:6px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px}
 .role-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:800;text-transform:uppercase;background:linear-gradient(135deg,var(--gold),#f39c12);color:#fff}
 .role-empty{text-align:center;padding:40px;color:var(--muted)}
+.fb-filter-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px;padding:14px 16px;background:#fff;border:1px solid var(--border);border-radius:12px}
+.fb-filter-bar select,.fb-filter-bar input[type=date]{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit}
+.fb-filter-bar input[type=text]{flex:1;min-width:160px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit}
+.theme-cloud{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:6px 2px;min-height:40px}
+.theme-chip{display:inline-flex;align-items:center;padding:5px 13px;border-radius:100px;background:linear-gradient(135deg,var(--red-light),#fff);border:1px solid rgba(232,0,61,.18);color:var(--red2);font-weight:700;cursor:pointer;transition:transform .15s}
+.theme-chip:hover{transform:translateY(-2px) scale(1.05);background:var(--red);color:#fff}
+.fb-comments-feed{max-height:520px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px}
+.fb-comment-card{border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:#fafbfe;transition:border-color .15s}
+.fb-comment-card:hover{border-color:var(--red)}
+.fb-comment-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px}
+.fb-comment-who{font-weight:700;font-size:12px;color:var(--dark)}
+.fb-comment-when{font-size:10px;color:var(--muted)}
+.fb-comment-tag{display:inline-block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:2px 8px;border-radius:100px;margin-right:6px;background:var(--red-light);color:var(--red2)}
+.fb-comment-text{font-size:12.5px;line-height:1.6;color:var(--text)}
+.fb-spotlight-grid{display:grid;grid-template-columns:220px 1fr;gap:18px}
+@media(max-width:900px){.fb-spotlight-grid{grid-template-columns:1fr}}
 .submenu-tabs{display:flex;border-bottom:1px solid var(--border);background:#fafbfe}
 .submenu-tab{padding:14px 22px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:all .15s}
 .submenu-tab:hover{color:var(--dark)}
@@ -84,6 +102,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .submenu-panel{display:none}
 .submenu-panel.active{display:block}
 .rights-check{width:18px;height:18px;cursor:pointer;accent-color:var(--red)}
+.field-missing{animation:fieldShake .4s ease;box-shadow:0 0 0 3px rgba(232,0,61,.35) !important;border-color:var(--red) !important;border-radius:8px}
+@keyframes fieldShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+#cloudBoot{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,var(--dark),var(--dark3));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#fff}
+#cloudBoot p{font-size:13px;font-weight:600;opacity:.85;letter-spacing:.3px}
+.view-only-banner{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#fff4e5;border:1px solid #f0c36d;border-radius:10px;font-size:12px;color:#8a5a00;font-weight:700;margin-bottom:14px}
+.access-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;padding:3px 10px;border-radius:100px;margin-left:8px;vertical-align:middle}
+.access-badge.edit{background:#dcfce7;color:#15803d}
+.access-badge.view{background:#fef3c7;color:#92400e}
 
 /* ===TOPBAR=== */
 .topbar{
@@ -563,7 +589,14 @@ tr:hover td{background:#f8f9ff}
 </head>
 <body>
 
+<!-- CLOUD BOOT OVERLAY -->
+<div id="cloudBoot">
+  <div class="spinner" style="border-color:rgba(255,255,255,.25);border-top-color:#fff"></div>
+  <p id="cloudBootMsg">Connecting to shared database…</p>
+</div>
+
 <!-- LOGIN -->
+
 <div id="loginScreen">
   <div class="login-particles" id="particles"></div>
   <div class="login-card">
@@ -636,31 +669,13 @@ tr:hover td{background:#f8f9ff}
         </div>
         <div class="fg">
           <label>Designation</label>
-          <select id="su-designation" onchange="onDesignationChange()">
+          <select id="su-designation">
             <option value="">— Select designation —</option>
-            <option>Service Engineer</option>
-            <option>Service Region Team Lead</option>
-            <option>QA Engineer</option>
-            <option>QA Team Lead</option>
-            <option>QA Manager / Head</option>
-            <option>Service Manager / Head</option>
-            <option>Operations Head</option>
-            <option>Others</option>
-          </select>
-        </div>
-        <div class="fg" id="su-deptWrap" style="display:none">
-          <label>Your Department</label>
-          <input type="text" id="su-department" placeholder="Enter your department">
-        </div>
-        <div class="fg">
-          <label>Access Role</label>
-          <select id="su-role">
-            <option value="">— Select access role —</option>
             <option value="Engineer">Engineer</option>
             <option value="Manager">Manager</option>
             <option value="HOD">HOD</option>
           </select>
-          <div class="hint" style="font-size:10px;color:var(--muted);margin-top:4px">This controls which modules you can access in the portal. Your admin can change this later.</div>
+          <div class="hint" style="font-size:10px;color:var(--muted);margin-top:4px">This determines which modules you can view and edit in the portal. Your admin can adjust this later.</div>
         </div>
         <div class="fg" id="su-error" style="display:none;color:var(--red);font-size:12px;font-weight:700"></div>
         <button class="btn-login" onclick="doSignUp()">Save →</button>
@@ -713,6 +728,7 @@ tr:hover td{background:#f8f9ff}
         <div id="topDate" style="font-size:10px;opacity:.6"></div>
       </div>
       <span class="shift-pill" id="topShiftPill">—</span>
+      <span class="access-badge view" id="accessBadge">🔖 Role</span>
       <button class="open-alert-btn" id="openAlertBtn" onclick="toggleAlertPanel()" style="display:none">
         🔴 Open Calls
         <span class="open-count-badge" id="openCountBadge">0</span>
@@ -768,11 +784,11 @@ tr:hover td{background:#f8f9ff}
     <div class="nav-item" data-tab="profile" onclick="showTab('profile',this)">
       <span class="ni">👤</span> My Profile
     </div>
+    <div class="nav-item" data-tab="rolesRights" id="navRolesRights" style="display:none" onclick="showTab('rolesRights',this)">
+      <span class="ni">🛡️</span> Roles &amp; Rights <span style="font-size:9px;background:var(--gold);color:#fff;padding:1px 6px;border-radius:100px;margin-left:4px">ADMIN</span>
+    </div>
     <div class="nav-item" data-tab="logs" onclick="showTab('logs',this)">
       <span class="ni">🧾</span> System Logs
-    </div>
-    <div class="nav-item" data-tab="roles" id="navRoles" style="display:none" onclick="showTab('roles',this)">
-      <span class="ni">🛡️</span> Roles <span style="font-size:9px;background:var(--gold);color:#fff;padding:1px 6px;border-radius:100px;margin-left:4px">ADMIN</span>
     </div>
     <div class="nav-item" data-tab="about" onclick="showTab('about',this)">
       <span class="ni">ℹ️</span> About
@@ -830,7 +846,8 @@ tr:hover td{background:#f8f9ff}
     <!-- ===LOG CALL=== -->
     <div id="tab-callLog" class="tab">
       <div class="ph"><h2>📞 Log a New Call</h2><p>Complete all fields for accurate records and dashboard insights</p></div>
-      <div class="card">
+      <div class="view-only-banner" style="display:none">👁️ You have view-only access. Contact your HOD/admin to log or edit calls.</div>
+      <div class="card" id="callLogCard">
         <div class="form-grid">
           <div class="fld-section">📋 Basic Information</div>
 
@@ -871,13 +888,7 @@ tr:hover td{background:#f8f9ff}
 
           <div class="fld-section">👷 Resource & Response</div>
 
-          <div class="fld"><label class="req">Primary Resource</label>
-            <select id="f-res">
-              <option value="">— Assign —</option>
-              <option>Sri Harsha</option><option>Talha</option><option>Deshraj</option>
-              <option>Vivek</option><option>Ganesh</option><option>Ashutosh</option><option>Pawan</option>
-            </select>
-          </div>
+          <div class="fld"><label>Primary Resource</label><input id="f-res" readonly></div>
           <div class="fld"><label>Supporting Resource(s)</label>
             <input id="f-support" placeholder="e.g. Talha, Ganesh" list="memberDl">
             <datalist id="memberDl">
@@ -1009,12 +1020,10 @@ tr:hover td{background:#f8f9ff}
           <option>Sri Harsha</option><option>Talha</option><option>Deshraj</option>
           <option>Vivek</option><option>Ganesh</option><option>Ashutosh</option><option>Pawan</option>
         </select>
-        <select id="fDate" onchange="renderTable()">
-          <option value="">All Dates</option>
-          <option value="today">Today</option>
-          <option value="week">This Week</option>
-          <option value="month">This Month</option>
-        </select>
+        <div class="fi-date-wrap" style="display:flex;align-items:center;gap:4px">
+          <input type="date" id="fDate" onchange="renderTable()" title="Filter by exact date">
+          <button class="btn-secondary" onclick="document.getElementById('fDate').value='';renderTable()" title="Clear date filter" style="padding:8px 10px">✕</button>
+        </div>
         <select id="fShift" onchange="renderTable()">
           <option value="">All Shifts</option>
           <option>Morning</option><option>General</option><option>Evening</option><option>Night</option>
@@ -1104,7 +1113,7 @@ tr:hover td{background:#f8f9ff}
     <div id="tab-sops" class="tab">
       <div class="ph"><h2>📄 Standard Operating Procedures</h2><p>Upload and manage SOPs in any format</p></div>
       <div style="display:flex;gap:10px;margin-bottom:16px">
-        <button class="btn-primary" onclick="openSopModal()">+ Add SOP</button>
+        <button class="btn-primary edit-only" data-module="sops" onclick="openSopModal()">+ Add SOP</button>
         <select id="sopFilter" onchange="renderSOPs()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px">
           <option value="">All Types</option>
           <option>Text</option><option>PDF</option><option>Word</option><option>PowerPoint</option><option>Excel</option><option>Video</option>
@@ -1228,6 +1237,11 @@ tr:hover td{background:#f8f9ff}
         <h2>💬 Team Feedback Portal</h2>
         <p>Confidential team-lead feedback survey · Merged from the ACG Inspections Feedback Portal</p>
       </div>
+      <div class="submenu-tabs" style="margin-bottom:16px;border-radius:10px;overflow:hidden;border:1px solid var(--border)">
+        <div class="submenu-tab active edit-only" data-module="feedback" id="fbSubtab-submit" onclick="showFeedbackSubtab('submit')">📝 Submit Feedback</div>
+        <div class="submenu-tab" id="fbSubtab-dashboard" onclick="showFeedbackSubtab('dashboard')">📊 Dashboard</div>
+      </div>
+      <div class="submenu-panel active" id="fbPanel-submit">
       <div id="fbApp">
       <div class="fb-wrap">
         <div class="hero">
@@ -1238,7 +1252,7 @@ tr:hover td{background:#f8f9ff}
 
         <div class="card">
           <div class="cfg-banner" id="cfg-banner">
-            <strong>⚙️ Admin Setup Required:</strong> Replace <code>YOUR_POWER_AUTOMATE_URL_HERE</code> in the script with your actual Power Automate HTTP trigger URL before sharing this link with the team.
+            <strong>⚙️ Admin Setup Required:</strong> The shared database isn't connected yet, so feedback can't be saved. Fill in <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> near the top of the script before sharing this link with the team.
           </div>
 
           <!-- PAGE 0 -->
@@ -1408,7 +1422,7 @@ tr:hover td{background:#f8f9ff}
               <p>Thank you for investing time in your team's growth.</p>
               <div class="succ-box">
                 <strong>📊 What happens next?</strong><br>
-                Your feedback has been written directly into the administrator's SharePoint data sheet. It will be reviewed, analysed in Power BI, and used to shape the team development plan for next quarter. All responses are confidential and visible only to the administrator.
+                Your feedback has been saved directly to the shared ACGI portal database and now feeds the live Feedback Dashboard for the team to review. It will be used to shape the team development plan for next quarter.
                 <div class="sdiv"></div>
                 <strong>ACG Inspections Pvt. Ltd.</strong> — Building inspection excellence, one feedback at a time.
               </div>
@@ -1433,6 +1447,68 @@ tr:hover td{background:#f8f9ff}
         <div class="fb-footer">ACG Inspections Pvt. Ltd. · Team Feedback Portal · Confidential</div>
       </div>
       </div><!-- /fbApp -->
+      </div><!-- /fbPanel-submit -->
+
+      <!-- FEEDBACK DASHBOARD -->
+      <div class="submenu-panel" id="fbPanel-dashboard">
+        <div class="fb-filter-bar">
+          <select id="fbf-lead" onchange="renderFeedbackDashboard()"><option value="">All Team Leads</option></select>
+          <select id="fbf-dept" onchange="renderFeedbackDashboard()"><option value="">All Departments</option></select>
+          <input type="date" id="fbf-from" onchange="renderFeedbackDashboard()" title="From date">
+          <input type="date" id="fbf-to" onchange="renderFeedbackDashboard()" title="To date">
+          <input type="text" id="fbf-search" placeholder="🔎 Search comments, names, themes…" oninput="renderFeedbackDashboard()">
+          <button class="btn-secondary" onclick="resetFeedbackFilters()" style="font-size:12px;padding:8px 14px">✕ Reset</button>
+        </div>
+
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">
+          <div class="kpi k-red"><div class="kpi-label">Submissions Shown</div><div class="kpi-value" id="fbk-total">0</div><div class="kpi-sub" id="fbk-total-sub">All time</div><div class="kpi-icon">📨</div></div>
+          <div class="kpi k-teal"><div class="kpi-label">Team Leads Responded</div><div class="kpi-value" id="fbk-leads">0</div><div class="kpi-sub">Unique respondents</div><div class="kpi-icon">🧑‍💼</div></div>
+          <div class="kpi k-gold"><div class="kpi-label">Avg. Overall Score</div><div class="kpi-value" id="fbk-avg">—</div><div class="kpi-sub">Out of 10</div><div class="kpi-icon">⭐</div></div>
+          <div class="kpi k-blue"><div class="kpi-label">Latest Submission</div><div class="kpi-value" id="fbk-latest" style="font-size:15px">—</div><div class="kpi-sub">Most recent</div><div class="kpi-icon">🕒</div></div>
+        </div>
+
+        <div id="fb-empty" class="empty" style="display:none">
+          <div class="ei">📭</div>
+          <p id="fb-empty-msg">No feedback submitted yet. Once a team lead submits the survey, results will appear here for everyone to see.</p>
+        </div>
+
+        <div id="fb-charts-wrap">
+          <div class="chart-grid">
+            <div class="chart-box"><h3>💬 Avg. Communication Rating per Member (out of 5)</h3><canvas id="fbChartComm"></canvas></div>
+            <div class="chart-box"><h3>📊 Avg. Overall Performance per Member (out of 5)</h3><canvas id="fbChartPerf"></canvas></div>
+          </div>
+          <div class="chart-grid">
+            <div class="chart-box"><h3>📈 Team Averages — Problem-Solving / Support / Meetings / Leadership (out of 10)</h3><canvas id="fbChartDims"></canvas></div>
+            <div class="chart-box"><h3>🤝 Most-Mentioned Collaborators <span style="font-weight:400;font-size:10px;color:var(--muted)">(click a bar to filter comments)</span></h3><canvas id="fbChartCollab"></canvas></div>
+          </div>
+          <div class="chart-grid">
+            <div class="chart-box"><h3>🌡️ Team Morale Tags <span style="font-weight:400;font-size:10px;color:var(--muted)">(click to filter)</span></h3><canvas id="fbChartMorale"></canvas></div>
+            <div class="chart-box"><h3>🔭 Next-Quarter Focus Areas <span style="font-weight:400;font-size:10px;color:var(--muted)">(click to filter)</span></h3><canvas id="fbChartFocus"></canvas></div>
+          </div>
+
+          <div class="card" style="margin-top:4px">
+            <div class="card-hd"><div class="card-title">🔥 Trending Themes in Written Feedback</div></div>
+            <p style="font-size:11px;color:var(--muted);margin-bottom:4px">Pulled automatically from every free-text answer below — bigger word = mentioned more often. Click a word to filter comments.</p>
+            <div class="theme-cloud" id="fbThemeCloud"></div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div class="card-hd"><div class="card-title">📝 Team Voice — What People Are Saying</div></div>
+            <p style="font-size:11px;color:var(--muted);margin-bottom:10px" id="fbCommentsCount"></p>
+            <div class="fb-comments-feed" id="fbCommentsFeed"></div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div class="card-hd"><div class="card-title">📋 Submissions</div></div>
+            <div class="role-table-wrap">
+              <table class="role-table">
+                <thead><tr><th>Date</th><th>Team Lead</th><th>Department</th><th style="width:90px">View</th></tr></thead>
+                <tbody id="fbSubmissionsBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ===SYSTEM LOGS=== -->
@@ -1465,39 +1541,39 @@ tr:hover td{background:#f8f9ff}
     </div>
 
     <!-- ===USER ROLES (ADMIN ONLY)=== -->
-    <div id="tab-roles" class="tab">
+    <div id="tab-rolesRights" class="tab">
       <div class="ph">
-        <h2>🛡️ Roles</h2>
-        <p>Admin-only module. Assign access roles to team members and configure which modules each role can see.</p>
+        <h2>🛡️ Roles &amp; Rights</h2>
+        <p>Admin-only module, visible only to Pawan. Define what each Access Role can do, and assign that role to each team member.</p>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
         <div class="submenu-tabs">
-          <div class="submenu-tab active" id="rolesSubtab-roles" onclick="showRolesSubtab('roles')">👤 Roles</div>
-          <div class="submenu-tab" id="rolesSubtab-rights" onclick="showRolesSubtab('rights')">🔐 Rights</div>
+          <div class="submenu-tab active" id="rolesSubtab-roles" onclick="showRolesSubtab('roles')">🔐 Roles</div>
+          <div class="submenu-tab" id="rolesSubtab-rights" onclick="showRolesSubtab('rights')">👤 Rights</div>
         </div>
 
-        <!-- ROLES SUB-TAB -->
+        <!-- ROLES SUB-TAB: per-module View/Edit permission matrix -->
         <div class="submenu-panel active" id="rolesPanel-roles" style="padding:20px">
           <div style="margin-bottom:14px;padding:12px 14px;background:#fff8f0;border-radius:10px;border-left:4px solid var(--gold);font-size:12px">
-            💡 Assign each team member an <strong>Access Role</strong> (Engineer / Manager / HOD) — this controls which modules they can see, based on the Rights tab. Changes apply from their next login. Initially only Pawan is admin; use "Make Admin" to let others manage this module too.
+            💡 For each module and role: tick <strong>Show</strong> to make that tab visible to that role at all, then pick <strong>View</strong> (read-only) or <strong>Edit</strong> (can add/change/close/delete). Untick Show to hide that tab completely for that role. Changes apply from each person's next login.
           </div>
           <div class="role-table-wrap">
-            <table class="role-table">
-              <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Mobile</th><th style="width:170px">Access Role</th><th style="width:220px">Designation</th><th style="width:90px">Admin</th></tr></thead>
-              <tbody id="roleTableBody"></tbody>
+            <table class="role-table" id="rightsTable">
+              <thead><tr><th>Module</th><th style="width:190px;text-align:center">Engineer</th><th style="width:190px;text-align:center">Manager</th><th style="width:190px;text-align:center">HOD</th></tr></thead>
+              <tbody id="rightsTableBody"></tbody>
             </table>
           </div>
         </div>
 
-        <!-- RIGHTS SUB-TAB -->
+        <!-- RIGHTS SUB-TAB: assign each registered user a role -->
         <div class="submenu-panel" id="rolesPanel-rights" style="padding:20px">
           <div style="margin-bottom:14px;padding:12px 14px;background:#fff8f0;border-radius:10px;border-left:4px solid var(--gold);font-size:12px">
-            💡 Tick which modules each Access Role can view. <strong>HOD</strong> and <strong>Manager</strong> default to full access. <strong>Engineer</strong> defaults to no access on Dashboard and Performance. Changes apply from the affected users' next login.
+            💡 Give each registered team member their Access Role — <strong>Engineer</strong>, <strong>Manager</strong> or <strong>HOD</strong> — which decides which View/Edit rules (set in the Roles tab) apply to them. Changes apply from their next login.
           </div>
           <div class="role-table-wrap">
-            <table class="role-table" id="rightsTable">
-              <thead><tr><th>Module</th><th style="width:110px;text-align:center">Engineer</th><th style="width:110px;text-align:center">Manager</th><th style="width:110px;text-align:center">HOD</th></tr></thead>
-              <tbody id="rightsTableBody"></tbody>
+            <table class="role-table">
+              <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Mobile</th><th style="width:180px">Access Role</th></tr></thead>
+              <tbody id="roleTableBody"></tbody>
             </table>
           </div>
         </div>
@@ -1551,7 +1627,7 @@ tr:hover td{background:#f8f9ff}
 <!-- Detail Modal -->
 <div class="modal-overlay" id="detailModal">
   <div class="modal lg">
-    <div class="modal-hd"><h2>📋 Call Detail</h2><span class="modal-close" onclick="document.getElementById('detailModal').classList.remove('open')">✕</span></div>
+    <div class="modal-hd"><h2 id="detailModalTitle">📋 Call Detail</h2><span class="modal-close" onclick="document.getElementById('detailModal').classList.remove('open')">✕</span></div>
     <div id="detailContent"></div>
   </div>
 </div>
@@ -1684,9 +1760,254 @@ AppLogger.info('Application started', {
 });
 
 // =============================================
+// CLOUD SYNC — shared backend storage for the pilot
+// Backend = Supabase (hosted Postgres + realtime).
+// See the deployment guide for how to create the project
+// and run the SQL setup script.
+// If SUPABASE_URL / SUPABASE_ANON_KEY are left as
+// placeholders, the app automatically falls back to
+// local-only (per-browser) storage so it still runs
+// during development.
+// =============================================
+const SUPABASE_URL = "https://axzdpwkhhhpbfdgrhzqk.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4emRwd2toaGhwYmZkZ3JoenFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxNDE5NDcsImV4cCI6MjEwNTcxNzk0N30.5xhL1hiu9BfH31vLJJSelGzxQCYHFjd1o4ip8dgBDZA";
+let sb = null;
+let supabaseReady = false;
+const CLOUD = { users:{}, rights:null, calls:[], sops:[], profiles:{}, feedbackSubmissions:[] };
+const _cloudLoaded = { users:false, rights:false, calls:false, sops:false, profiles:false, feedbackSubmissions:false };
+
+function isSupabaseConfigured(){
+  return SUPABASE_URL.indexOf('PASTE_YOUR_SUPABASE') === -1 && SUPABASE_ANON_KEY.indexOf('PASTE_YOUR_SUPABASE') === -1;
+}
+
+// ---- field-name mapping: app uses camelCase, Postgres uses snake_case ----
+const MODULE_DB_COL = {dashboard:'dashboard', callLog:'call_log', allCalls:'all_calls', openCalls:'open_calls',
+  champion:'champion', performance:'performance', sops:'sops', nonAmc:'non_amc',
+  repeatedIssues:'repeated_issues', pmFollowup:'pm_followup', feedback:'feedback'};
+
+function callToDb(r){
+  return { id:r.id, logged_by:r.loggedBy, log_date:r.logDate, log_time:r.logTime, shift:r.shift,
+    customer:r.customer, region:r.region, location:r.location, amc:r.amc, contact_name:r.contactName,
+    contact_info:r.contactInfo, issue:r.issue, jira:r.jira, resource:r.resource,
+    support_resource:r.supportResource, report_date:r.reportDate, report_time:r.reportTime,
+    resolve_date:r.resolveDate||null, response_time:r.responseTime, issue_type:r.issueType,
+    platform:r.platform, system_type:r.systemType, version:r.version, serial:r.serial,
+    priority:r.priority, analysis:r.analysis, resolution:r.resolution, remarks:r.remarks,
+    root_cause:r.rootCause, hours:r.hours, status:r.status, timeline:r.timeline||[] };
+}
+function dbToCall(row){
+  return { id:Number(row.id), loggedBy:row.logged_by, logDate:row.log_date, logTime:row.log_time,
+    shift:row.shift, customer:row.customer, region:row.region, location:row.location, amc:row.amc,
+    contactName:row.contact_name, contactInfo:row.contact_info, issue:row.issue, jira:row.jira,
+    resource:row.resource, supportResource:row.support_resource, reportDate:row.report_date,
+    reportTime:row.report_time, resolveDate:row.resolve_date, responseTime:Number(row.response_time)||0,
+    issueType:row.issue_type, platform:row.platform, systemType:row.system_type, version:row.version,
+    serial:row.serial, priority:row.priority, analysis:row.analysis, resolution:row.resolution,
+    remarks:row.remarks, rootCause:row.root_cause, hours:Number(row.hours)||0, status:row.status,
+    timeline: row.timeline||[] };
+}
+function sopToDb(s){
+  return { id:s.id, title:s.title, category:s.category, format:s.format, description:s.description,
+    text:s.text, file_name:s.fileName, added_by:s.addedBy, date:s.date };
+}
+function dbToSop(row){
+  return { id:Number(row.id), title:row.title, category:row.category, format:row.format,
+    description:row.description, text:row.text, fileName:row.file_name, addedBy:row.added_by, date:row.date };
+}
+function userToDb(u){
+  return { username:u.username, name:u.name, email:u.email, mobile:u.mobile, password:u.password,
+    designation:u.designation, role:u.role, is_admin:!!u.isAdmin };
+}
+function dbToUser(row){
+  return { username:row.username, name:row.name, email:row.email, mobile:row.mobile, password:row.password,
+    designation:row.designation, role:row.role, isAdmin:!!row.is_admin, createdAt:row.created_at };
+}
+function rightsRowToDb(role, roleRights){
+  const d = {role:role};
+  MODULE_LIST.forEach(m=>{
+    const v = roleRights[m.key];
+    d[MODULE_DB_COL[m.key]] = (v==='hidden') ? 'hidden' : (v==='edit' ? 'edit' : 'view');
+  });
+  return d;
+}
+function dbRowToRights(row){
+  const r = {};
+  MODULE_LIST.forEach(m=>{
+    const v = row[MODULE_DB_COL[m.key]];
+    // backward-compatible with the old boolean-only rights table (true/false)
+    if(v===true) r[m.key]='edit';
+    else if(v==='edit') r[m.key]='edit';
+    else if(v==='hidden') r[m.key]='hidden';
+    else r[m.key]='view';
+  });
+  return r;
+}
+function profileToDb(name, p){
+  return { name:name, code:p.code||'', phone:p.phone||'', email:p.email||'', role:p.role||'',
+    shift:p.shift||'', photo:p.photo||null };
+}
+function dbToProfile(row){
+  return { name:row.name, code:row.code, phone:row.phone, email:row.email, role:row.role,
+    shift:row.shift, photo:row.photo };
+}
+
+async function refreshCallsAndSops(){
+  const [callsRes, sopsRes] = await Promise.all([
+    sb.from('calls').select('*').order('id', {ascending:false}),
+    sb.from('sops').select('*').order('id', {ascending:false})
+  ]);
+  if(callsRes.error) throw callsRes.error;
+  if(sopsRes.error) throw sopsRes.error;
+  CLOUD.calls = (callsRes.data||[]).map(dbToCall);
+  CLOUD.sops = (sopsRes.data||[]).map(dbToSop);
+  _cloudLoaded.calls = true; _cloudLoaded.sops = true;
+}
+async function refreshFeedback(){
+  // Non-throwing: if feedback_submissions doesn't exist yet (setup SQL not run),
+  // the Feedback Dashboard just stays empty instead of breaking the whole app boot.
+  try{
+    const res = await sb.from('feedback_submissions').select('*').order('id', {ascending:false});
+    if(res.error) throw res.error;
+    CLOUD.feedbackSubmissions = res.data||[];
+  }catch(e){
+    CLOUD.feedbackSubmissions = [];
+    AppLogger.warn('Feedback Dashboard table not available yet — run feedback_setup.sql in Supabase', {message: e.message});
+  }
+  _cloudLoaded.feedbackSubmissions = true;
+}
+async function refreshSystem(){
+  const [usersRes, rightsRes, profilesRes] = await Promise.all([
+    sb.from('users').select('*'),
+    sb.from('rights').select('*'),
+    sb.from('profiles').select('*')
+  ]);
+  if(usersRes.error) throw usersRes.error;
+  if(rightsRes.error) throw rightsRes.error;
+  if(profilesRes.error) throw profilesRes.error;
+  const usersObj = {}; (usersRes.data||[]).forEach(row=>{ usersObj[row.username] = dbToUser(row); });
+  CLOUD.users = usersObj;
+  const rightsObj = {}; (rightsRes.data||[]).forEach(row=>{ rightsObj[row.role] = dbRowToRights(row); });
+  CLOUD.rights = rightsObj;
+  const profilesObj = {}; (profilesRes.data||[]).forEach(row=>{ profilesObj[row.name] = dbToProfile(row); });
+  CLOUD.profiles = profilesObj;
+  _cloudLoaded.users = true; _cloudLoaded.rights = true; _cloudLoaded.profiles = true;
+}
+function pushCall(record, isNew){
+  CLOUD.calls = callData;
+  if(!supabaseReady) return;
+  const row = callToDb(record);
+  const q = isNew ? sb.from('calls').insert([row]) : sb.from('calls').update(row).eq('id', record.id);
+  q.then(({error})=>{ if(error) AppLogger.error('Supabase call save failed', {message:error.message}); });
+}
+function pushSopAdd(record){
+  CLOUD.sops = sops;
+  if(!supabaseReady) return;
+  sb.from('sops').insert([sopToDb(record)]).then(({error})=>{ if(error) AppLogger.error('Supabase sop add failed', {message:error.message}); });
+}
+function pushSopDelete(id){
+  CLOUD.sops = sops;
+  if(!supabaseReady) return;
+  sb.from('sops').delete().eq('id', id).then(({error})=>{ if(error) AppLogger.error('Supabase sop delete failed', {message:error.message}); });
+}
+async function pushFeedback(payload){
+  if(!supabaseReady) return {ok:false, error:'Shared database is not connected right now. Please check with your admin.'};
+  const {error} = await sb.from('feedback_submissions').insert([payload]);
+  if(error){
+    AppLogger.error('Supabase feedback save failed', {message:error.message});
+    return {ok:false, error: error.message};
+  }
+  await refreshFeedback();
+  if(document.getElementById('tab-feedback').classList.contains('active') &&
+     document.getElementById('fbPanel-dashboard') && document.getElementById('fbPanel-dashboard').classList.contains('active')){
+    renderFeedbackDashboard();
+  }
+  return {ok:true};
+}
+function pushProfile(name, p){
+  CLOUD.profiles = profiles;
+  if(!supabaseReady) return;
+  sb.from('profiles').upsert([profileToDb(name, p)], {onConflict:'name'})
+    .then(({error})=>{ if(error) AppLogger.error('Supabase profile save failed', {message:error.message}); });
+}
+// Called whenever anything relevant changes, whether from our own save
+// or a realtime push triggered by someone else's action
+function onCloudUpdate(){
+  if(!currentUser) return;
+  callData = CLOUD.calls || [];
+  sops = CLOUD.sops || [];
+  const activeTab = document.querySelector('.tab.active');
+  const activeKey = activeTab ? activeTab.id.replace('tab-','') : '';
+  if(['dashboard','callLog','allCalls','openCalls','champion','performance','sops','nonAmc','repeatedIssues'].includes(activeKey)){
+    renderAll();
+  }
+  checkOpenCallsAlert();
+  if(activeKey==='profile') loadProfile();
+  applyRoleAccess();
+  if(activeKey==='rolesRights'){
+    if(document.getElementById('rolesPanel-roles').classList.contains('active')) renderRightsMatrix();
+    if(document.getElementById('rolesPanel-rights').classList.contains('active')) renderUserRoles();
+  }
+  if(activeKey==='feedback' && document.getElementById('fbPanel-dashboard') && document.getElementById('fbPanel-dashboard').classList.contains('active')){
+    renderFeedbackDashboard();
+  }
+}
+let _realtimeDebounce = null;
+function handleRealtimeChange(payload){
+  AppLogger.info('Realtime update received from Supabase', {table: payload.table});
+  clearTimeout(_realtimeDebounce);
+  _realtimeDebounce = setTimeout(()=>{
+    Promise.all([refreshCallsAndSops(), refreshSystem(), refreshFeedback()])
+      .then(onCloudUpdate)
+      .catch(err=>AppLogger.error('Realtime refresh failed', {message: err.message}));
+  }, 400); // small debounce so a burst of changes triggers one refresh, not many
+}
+function startRealtime(){
+  if(!supabaseReady) return;
+  sb.channel('acgi-portal-changes')
+    .on('postgres_changes', {event:'*', schema:'public', table:'calls'}, handleRealtimeChange)
+    .on('postgres_changes', {event:'*', schema:'public', table:'sops'}, handleRealtimeChange)
+    .on('postgres_changes', {event:'*', schema:'public', table:'users'}, handleRealtimeChange)
+    .on('postgres_changes', {event:'*', schema:'public', table:'rights'}, handleRealtimeChange)
+    .on('postgres_changes', {event:'*', schema:'public', table:'profiles'}, handleRealtimeChange)
+    .on('postgres_changes', {event:'*', schema:'public', table:'feedback_submissions'}, handleRealtimeChange)
+    .subscribe();
+}
+async function initCloudSync(){
+  const msgEl = document.getElementById('cloudBootMsg');
+  if(!isSupabaseConfigured()){
+    AppLogger.warn('Supabase not configured — running in local-only mode. Data will NOT be shared between browsers/devices.');
+    if(msgEl) msgEl.textContent = 'Running in local-only mode (no shared backend configured)…';
+    supabaseReady = false;
+    _cloudLoaded.users = _cloudLoaded.rights = _cloudLoaded.calls = _cloudLoaded.sops = _cloudLoaded.profiles = _cloudLoaded.feedbackSubmissions = true;
+    CLOUD.rights = defaultRights();
+    setTimeout(hideCloudBoot, 600);
+    return;
+  }
+  try{
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    await Promise.all([refreshCallsAndSops(), refreshSystem(), refreshFeedback()]);
+    if(!CLOUD.rights || !Object.keys(CLOUD.rights).length) CLOUD.rights = defaultRights();
+    supabaseReady = true;
+    AppLogger.success('Connected to Supabase backend');
+    startRealtime();
+  }catch(e){
+    AppLogger.error('Supabase connection failed — falling back to local-only mode', {message: e.message});
+    supabaseReady = false;
+    CLOUD.rights = defaultRights();
+    if(msgEl) msgEl.textContent = 'Could not reach shared backend — using local-only mode…';
+    await new Promise(r=>setTimeout(r,900));
+  }
+  hideCloudBoot();
+}
+function hideCloudBoot(){
+  const el = document.getElementById('cloudBoot');
+  if(el) el.style.display = 'none';
+}
+initCloudSync();
+
+// =============================================
 // STATE
 // =============================================
-const SK = 'acgi_calls', SPK = 'acgi_profiles', SOK = 'acgi_sops';
 let callData = [], profiles = {}, sops = [], currentUser = null;
 let pills = {}, selectedStatus = null, closingCallId = null;
 let charts = {};
@@ -1715,10 +2036,6 @@ const COLORS = ['#E8003D','#00c9c8','#f5a623','#2ecc71','#9b59b6','#3498db','#e6
 // =============================================
 const USERS_KEY = 'acgi_users';
 const RIGHTS_KEY = 'acgi_role_rights';
-const DESIGNATION_OPTIONS = [
-  'Service Engineer','Service Region Team Lead','QA Engineer','QA Team Lead',
-  'QA Manager / Head','Service Manager / Head','Operations Head'
-];
 const ACCESS_ROLES = ['Engineer','Manager','HOD'];
 const MODULE_LIST = [
   {key:'dashboard', label:'📊 Dashboard'},
@@ -1734,42 +2051,59 @@ const MODULE_LIST = [
   {key:'feedback', label:'💬 Team Feedback'}
 ];
 function defaultRights(){
-  const engineer = {}; MODULE_LIST.forEach(m=>engineer[m.key] = (m.key!=='dashboard' && m.key!=='performance'));
-  const full = {}; MODULE_LIST.forEach(m=>full[m.key] = true);
-  return {Engineer:engineer, Manager:Object.assign({},full), HOD:Object.assign({},full)};
+  const mk = (level)=>{ const o={}; MODULE_LIST.forEach(m=>o[m.key] = level); return o; };
+  return {Engineer: mk('view'), Manager: mk('view'), HOD: mk('edit')};
 }
 let pendingSignup = null;
 
 function loadUsers(){
-  try{ return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); }
-  catch(e){ return {}; }
+  return CLOUD.users || {};
 }
 function saveUsers(users){
-  try{ localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
-  catch(e){ AppLogger.error('Failed to persist users', {message:e.message}); }
+  CLOUD.users = users;
+  if(!supabaseReady) return;
+  const rows = Object.keys(users).map(uname=>userToDb(users[uname]));
+  if(!rows.length) return;
+  sb.from('users').upsert(rows, {onConflict:'username'})
+    .then(({error})=>{ if(error) AppLogger.error('Supabase users save failed', {message:error.message}); });
 }
 function loadRights(){
-  let stored = {};
-  try{ stored = JSON.parse(localStorage.getItem(RIGHTS_KEY) || '{}'); }
-  catch(e){ stored = {}; }
   const merged = defaultRights();
+  const stored = CLOUD.rights || {};
   ACCESS_ROLES.forEach(r=>{
     if(stored[r]) Object.assign(merged[r], stored[r]);
   });
   return merged;
 }
 function saveRights(rights){
-  try{ localStorage.setItem(RIGHTS_KEY, JSON.stringify(rights)); }
-  catch(e){ AppLogger.error('Failed to persist role rights', {message:e.message}); }
+  CLOUD.rights = rights;
+  if(!supabaseReady) return;
+  const rows = ACCESS_ROLES.map(role=>rightsRowToDb(role, rights[role]||{}));
+  sb.from('rights').upsert(rows, {onConflict:'role'})
+    .then(({error})=>{ if(error) AppLogger.error('Supabase rights save failed', {message:error.message}); });
 }
+// A module can be: 'hidden' (tab not shown at all), 'view' (read-only) or 'edit' (full access)
 function canAccessModule(moduleKey){
   if(!currentUser) return false;
   if(currentUser.isAdmin) return true;
-  if(!MODULE_LIST.some(m=>m.key===moduleKey)) return true; // ungoverned tabs (profile/logs/roles/about) always allowed
+  if(!MODULE_LIST.some(m=>m.key===moduleKey)) return true; // ungoverned tabs (profile/logs/rolesRights/about)
   const rights = loadRights();
   const roleRights = rights[currentUser.role];
   if(!roleRights) return true;
-  return roleRights[moduleKey] !== false;
+  return roleRights[moduleKey] !== 'hidden';
+}
+function canEditModule(moduleKey){
+  if(!currentUser) return false;
+  if(currentUser.isAdmin) return true;
+  if(!MODULE_LIST.some(m=>m.key===moduleKey)) return true; // ungoverned tabs (profile/logs/rolesRights/about)
+  const rights = loadRights();
+  const roleRights = rights[currentUser.role];
+  if(!roleRights) return false;
+  return roleRights[moduleKey] === 'edit';
+}
+// "Editing a call" can be granted via either the All Calls or Open Calls module
+function canEditCalls(){
+  return canEditModule('allCalls') || canEditModule('openCalls');
 }
 function applyRoleAccess(){
   if(!currentUser) return;
@@ -1777,15 +2111,53 @@ function applyRoleAccess(){
     const ni = document.querySelector('[data-tab="'+m.key+'"]');
     if(ni) ni.style.display = canAccessModule(m.key) ? '' : 'none';
   });
+  applyEditAccess();
+  // If the tab currently on screen just became hidden (e.g. a live rights change), move away from it
+  const activeTab = document.querySelector('.tab.active');
+  if(activeTab){
+    const key = activeTab.id.replace('tab-','');
+    if(MODULE_LIST.some(m=>m.key===key) && !canAccessModule(key)){
+      const firstAllowed = MODULE_LIST.find(m=>canAccessModule(m.key));
+      if(firstAllowed) showTab(firstAllowed.key);
+    }
+  }
+}
+function guardEdit(moduleKeyOrLabel, maybeLabel){
+  // supports guardEdit('sops','adding an SOP') and the legacy guardEdit('label') for call editing
+  let allowed, actionLabel;
+  if(maybeLabel!==undefined){ allowed = canEditModule(moduleKeyOrLabel); actionLabel = maybeLabel; }
+  else { allowed = canEditCalls(); actionLabel = moduleKeyOrLabel; }
+  if(allowed) return true;
+  showToast('View only — you do not have edit access for '+ (actionLabel||'this action'), 'error');
+  AppLogger.warn('Blocked edit attempt — view-only for this module', {username: currentUser && currentUser.username, role: currentUser && currentUser.role, action: actionLabel});
+  return false;
+}
+function applyEditAccess(){
+  if(!currentUser) return;
+  const badge = document.getElementById('accessBadge');
+  if(badge){
+    badge.textContent = currentUser.isAdmin ? '🛡️ Admin (HOD)' : '🔖 '+currentUser.role;
+    badge.className = 'access-badge ' + (currentUser.isAdmin || currentUser.role==='HOD' ? 'edit' : 'view');
+  }
+  document.querySelectorAll('.edit-only[data-module]').forEach(el=>{
+    el.style.display = canEditModule(el.getAttribute('data-module')) ? '' : 'none';
+  });
+  const callEditor = canEditModule('callLog');
+  document.querySelectorAll('.view-only-banner').forEach(el=>{
+    el.style.display = callEditor ? 'none' : 'flex';
+  });
+  const callCard = document.getElementById('callLogCard');
+  if(callCard){
+    callCard.querySelectorAll('input,select,textarea,button').forEach(el=>{
+      if(el.id==='f-by' || el.id==='f-shift' || el.id==='f-res') return; // always-readonly fields, leave as-is
+      el.disabled = !callEditor;
+    });
+  }
 }
 function showAuth(view){
   document.querySelectorAll('.auth-view').forEach(v=>v.classList.remove('active'));
   const el = document.getElementById('av-'+view);
   if(el) el.classList.add('active');
-}
-function onDesignationChange(){
-  const v = document.getElementById('su-designation').value;
-  document.getElementById('su-deptWrap').style.display = v==='Others' ? 'block' : 'none';
 }
 function doSignUp(){
   const name = document.getElementById('su-name').value.trim();
@@ -1793,20 +2165,18 @@ function doSignUp(){
   const mobile = document.getElementById('su-mobile').value.trim();
   const username = document.getElementById('su-username').value.trim().toLowerCase();
   const password = document.getElementById('su-password').value;
-  const designationSel = document.getElementById('su-designation').value;
-  const department = document.getElementById('su-department').value.trim();
-  const role = document.getElementById('su-role').value;
+  const designation = document.getElementById('su-designation').value;
   const errEl = document.getElementById('su-error');
   errEl.style.display = 'none';
 
-  if(!name || !email || !mobile || !username || !password || !designationSel || !role){
-    errEl.textContent = 'Please fill in all fields, including Access Role.'; errEl.style.display='block'; return;
-  }
-  if(designationSel==='Others' && !department){
-    errEl.textContent = 'Please enter your department.'; errEl.style.display='block'; return;
+  if(!name || !email || !mobile || !username || !password || !designation){
+    errEl.textContent = 'Please fill in all fields, including Designation.'; errEl.style.display='block'; return;
   }
   if(!/^\d{10}$/.test(mobile)){
     errEl.textContent = 'Please enter a valid 10-digit mobile number.'; errEl.style.display='block'; return;
+  }
+  if(username === 'pawan'){
+    errEl.textContent = 'That username is reserved. Please choose another.'; errEl.style.display='block'; return;
   }
   const users = loadUsers();
   if(users[username]){
@@ -1814,17 +2184,12 @@ function doSignUp(){
   }
 
   const otp = String(Math.floor(100000 + Math.random()*900000));
-  pendingSignup = {
-    name, email, mobile, username, password, role,
-    designation: designationSel==='Others' ? department : designationSel,
-    isOtherDept: designationSel==='Others',
-    otp
-  };
+  pendingSignup = { name, email, mobile, username, password, designation, role: designation, otp };
   document.getElementById('otp-mobile-display').textContent = mobile.replace(/^(\d{2})\d{6}(\d{2})$/,'$1••••••$2');
   document.getElementById('otp-demo-code').textContent = otp;
   document.getElementById('otp-input').value = '';
   document.getElementById('otp-error').style.display='none';
-  AppLogger.info('OTP generated for sign-up', {username: username, mobile: mobile, role: role});
+  AppLogger.info('OTP generated for sign-up', {username: username, mobile: mobile, designation: designation});
   showAuth('otp');
 }
 function verifyOtp(){
@@ -1837,7 +2202,6 @@ function verifyOtp(){
     return;
   }
   const users = loadUsers();
-  const isAdmin = pendingSignup.name.trim().toLowerCase() === 'pawan';
   users[pendingSignup.username] = {
     name: pendingSignup.name,
     email: pendingSignup.email,
@@ -1846,31 +2210,15 @@ function verifyOtp(){
     password: pendingSignup.password,
     designation: pendingSignup.designation,
     role: pendingSignup.role,
-    isAdmin: isAdmin,
+    isAdmin: false,
     createdAt: new Date().toISOString()
   };
   saveUsers(users);
-  AppLogger.success('New account created', {username: pendingSignup.username, name: pendingSignup.name, designation: pendingSignup.designation, role: pendingSignup.role, isAdmin});
+  AppLogger.success('New account created', {username: pendingSignup.username, name: pendingSignup.name, designation: pendingSignup.designation});
   pendingSignup = null;
   showAuth('success');
 }
-function doSignIn(){
-  const username = document.getElementById('si-username').value.trim().toLowerCase();
-  const password = document.getElementById('si-password').value;
-  const shift = document.getElementById('loginShift').value;
-  const errEl = document.getElementById('si-error');
-  errEl.style.display = 'none';
-
-  if(!username || !password || !shift){
-    errEl.textContent = 'Please fill in username, password and shift.'; errEl.style.display='block'; return;
-  }
-  const users = loadUsers();
-  const user = users[username];
-  if(!user || user.password !== password){
-    errEl.textContent = 'Invalid username or password.'; errEl.style.display='block';
-    AppLogger.warn('Failed sign-in attempt', {username: username});
-    return;
-  }
+function completeLogin(user, shift){
   currentUser = {name:user.name, team:user.designation, shift:shift, username:user.username, isAdmin: !!user.isAdmin, role: user.role || 'Engineer'};
   AppLogger.success('User logged in', {name:user.name, username:user.username, designation:user.designation, role:currentUser.role, shift:shift, isAdmin: !!user.isAdmin});
   document.getElementById('loginScreen').style.display='none';
@@ -1879,8 +2227,9 @@ function doSignIn(){
   document.getElementById('topShiftPill').textContent = shift + ' Shift';
   document.getElementById('topShiftPill').className = 'shift-pill '+shift;
   document.getElementById('f-by').value = user.name;
+  document.getElementById('f-res').value = user.name;
   document.getElementById('f-shift').value = shift;
-  document.getElementById('navRoles').style.display = currentUser.isAdmin ? 'block' : 'none';
+  document.getElementById('navRolesRights').style.display = currentUser.isAdmin ? 'flex' : 'none';
   applyRoleAccess();
   const now = new Date();
   document.getElementById('f-date').value = datStr(now);
@@ -1897,10 +2246,43 @@ function doSignIn(){
   setTimeout(()=>{
     if(getOpenCalls().length>0) showAlertPanel();
   },2000);
-  if(!canAccessModule('dashboard')){
-    const firstAllowed = MODULE_LIST.find(m=>canAccessModule(m.key));
-    if(firstAllowed) showTab(firstAllowed.key);
+}
+function doSignIn(){
+  const username = document.getElementById('si-username').value.trim().toLowerCase();
+  const password = document.getElementById('si-password').value;
+  const shift = document.getElementById('loginShift').value;
+  const errEl = document.getElementById('si-error');
+  errEl.style.display = 'none';
+
+  if(!username || !password || !shift){
+    errEl.textContent = 'Please fill in username, password and shift.'; errEl.style.display='block'; return;
   }
+
+  // Built-in admin login — always available regardless of the shared users table
+  if(username === 'pawan' && password === 'Tnt@123'){
+    const users = loadUsers();
+    const adminUser = {
+      name: (users.pawan && users.pawan.name) || 'Pawan',
+      email: (users.pawan && users.pawan.email) || '',
+      mobile: (users.pawan && users.pawan.mobile) || '',
+      username: 'pawan', password: 'Tnt@123',
+      designation: 'HOD', role: 'HOD', isAdmin: true,
+      createdAt: (users.pawan && users.pawan.createdAt) || new Date().toISOString()
+    };
+    users.pawan = adminUser;
+    saveUsers(users);
+    completeLogin(adminUser, shift);
+    return;
+  }
+
+  const users = loadUsers();
+  const user = users[username];
+  if(!user || user.password !== password){
+    errEl.textContent = 'Invalid username or password.'; errEl.style.display='block';
+    AppLogger.warn('Failed sign-in attempt', {username: username});
+    return;
+  }
+  completeLogin(user, shift);
 }
 function doLogout(){
   AppLogger.info('User logged out', currentUser ? {name:currentUser.name, username:currentUser.username} : null);
@@ -1911,109 +2293,116 @@ function doLogout(){
 }
 
 // =============================================
-// ROLES MODULE (ADMIN ONLY) — Roles & Rights sub-tabs
+// ROLES & RIGHTS MODULE (ADMIN ONLY — Pawan)
+// "Roles" sub-tab = per-module View/Edit matrix for Engineer/Manager/HOD
+// "Rights" sub-tab = assign each registered user their Access Role
 // =============================================
 function showRolesSubtab(which){
   document.querySelectorAll('.submenu-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.submenu-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('rolesSubtab-'+which).classList.add('active');
   document.getElementById('rolesPanel-'+which).classList.add('active');
-  if(which==='roles') renderRoles();
-  if(which==='rights') renderRights();
+  if(which==='roles') renderRightsMatrix();
+  if(which==='rights') renderUserRoles();
 }
-function renderRoles(){
-  if(!currentUser || !currentUser.isAdmin){
-    showToast('Only admin (Pawan) can access the Roles module', 'error');
-    showTab('dashboard');
-    return;
-  }
+function guardAdminOnly(){
+  if(currentUser && currentUser.isAdmin) return true;
+  showToast('Only Pawan (admin) can access Roles & Rights', 'error');
+  showTab('dashboard');
+  return false;
+}
+// "Roles" sub-tab: per-module View/Edit matrix
+function renderRightsMatrix(){
+  if(!guardAdminOnly()) return;
+  const rights = loadRights();
+  const body = document.getElementById('rightsTableBody');
+  body.innerHTML = MODULE_LIST.map(m=>{
+    const cells = ACCESS_ROLES.map(role=>{
+      const raw = rights[role][m.key];
+      const visible = raw !== 'hidden';
+      const level = raw === 'edit' ? 'edit' : 'view';
+      return `<td style="text-align:center">
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+          <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);cursor:pointer" title="Show this tab to ${role}">
+            <input type="checkbox" class="rights-check" ${visible?'checked':''} onchange="saveRightVisibility('${role}','${m.key}',this.checked)">
+            Show
+          </label>
+          <select ${visible?'':'disabled'} onchange="saveRight('${role}','${m.key}',this.value)">
+            <option value="view" ${level==='view'?'selected':''}>👁️ View</option>
+            <option value="edit" ${level==='edit'?'selected':''}>✏️ Edit</option>
+          </select>
+        </div>
+      </td>`;
+    }).join('');
+    return `<tr><td>${m.label}</td>${cells}</tr>`;
+  }).join('');
+}
+function saveRightVisibility(role, moduleKey, checked){
+  const rights = loadRights();
+  rights[role][moduleKey] = checked ? 'view' : 'hidden';
+  saveRights(rights);
+  renderRightsMatrix();
+  showToast((checked?'Shown':'Hidden')+' — '+role+' tab access for "'+moduleKey+'"', 'success');
+  AppLogger.success('Module visibility updated by admin', {admin: currentUser.username, role: role, module: moduleKey, visible: checked});
+}
+function saveRight(role, moduleKey, level){
+  const rights = loadRights();
+  if(rights[role][moduleKey]==='hidden') return; // select is disabled while hidden; ignore stray events
+  rights[role][moduleKey] = level;
+  saveRights(rights);
+  showToast(role+' access to "'+moduleKey+'" set to '+level, 'success');
+  AppLogger.success('Module right updated by admin', {admin: currentUser.username, role: role, module: moduleKey, level: level});
+}
+// "Rights" sub-tab: assign each registered user their Access Role
+function renderUserRoles(){
+  if(!guardAdminOnly()) return;
   const users = loadUsers();
   const body = document.getElementById('roleTableBody');
-  const usernames = Object.keys(users);
+  const usernames = Object.keys(users).filter(u=>u!=='pawan');
   if(!usernames.length){
-    body.innerHTML = '<tr><td colspan="7" class="role-empty">No registered users yet.</td></tr>';
+    body.innerHTML = '<tr><td colspan="5" class="role-empty">No registered users yet.</td></tr>';
     return;
   }
   body.innerHTML = usernames.map(uname=>{
     const u = users[uname];
     const roleOpts = ACCESS_ROLES.map(r=>`<option value="${r}" ${(u.role||'Engineer')===r?'selected':''}>${r}</option>`).join('');
-    const desigOpts = DESIGNATION_OPTIONS.map(r=>`<option value="${r}" ${u.designation===r?'selected':''}>${r}</option>`).join('');
-    const desigCustom = DESIGNATION_OPTIONS.includes(u.designation) ? '' : `<option value="${u.designation}" selected>${u.designation} (custom)</option>`;
-    const adminBadge = u.isAdmin ? '<span class="role-badge">Admin</span>' : `<button class="btn-secondary" style="font-size:11px;padding:4px 10px" onclick="makeAdmin('${uname}')">Make Admin</button>`;
     return `<tr>
       <td>${u.name}</td>
       <td>${u.username}</td>
       <td>${u.email||'—'}</td>
       <td>${u.mobile||'—'}</td>
-      <td><select onchange="saveAccessRole('${uname}', this.value)">${roleOpts}</select></td>
-      <td><select onchange="saveDesignation('${uname}', this.value)">${desigCustom}${desigOpts}</select></td>
-      <td>${adminBadge}</td>
+      <td><select onchange="saveUserRole('${uname}', this.value)">${roleOpts}</select></td>
     </tr>`;
   }).join('');
 }
-function saveAccessRole(uname, newRole){
+function saveUserRole(uname, newRole){
   const users = loadUsers();
   if(!users[uname]) return;
   users[uname].role = newRole;
+  users[uname].designation = newRole;
   saveUsers(users);
   showToast('Access role updated for '+users[uname].name, 'success');
   AppLogger.success('User access role updated by admin', {admin: currentUser.username, target: uname, newRole: newRole});
-}
-function saveDesignation(uname, newDesig){
-  const users = loadUsers();
-  if(!users[uname]) return;
-  users[uname].designation = newDesig;
-  saveUsers(users);
-  showToast('Designation updated for '+users[uname].name, 'success');
-  AppLogger.success('User designation updated by admin', {admin: currentUser.username, target: uname, newDesignation: newDesig});
-}
-function makeAdmin(uname){
-  const users = loadUsers();
-  if(!users[uname]) return;
-  if(!confirm('Grant admin access to '+users[uname].name+'?')) return;
-  users[uname].isAdmin = true;
-  saveUsers(users);
-  renderRoles();
-  AppLogger.success('Admin access granted', {admin: currentUser.username, target: uname});
-}
-function renderRights(){
-  if(!currentUser || !currentUser.isAdmin){
-    showToast('Only admin (Pawan) can access the Roles module', 'error');
-    showTab('dashboard');
-    return;
-  }
-  const rights = loadRights();
-  const body = document.getElementById('rightsTableBody');
-  body.innerHTML = MODULE_LIST.map(m=>{
-    const cells = ACCESS_ROLES.map(role=>{
-      const checked = rights[role][m.key] !== false;
-      return `<td style="text-align:center"><input type="checkbox" class="rights-check" ${checked?'checked':''} onchange="saveRight('${role}','${m.key}',this.checked)"></td>`;
-    }).join('');
-    return `<tr><td>${m.label}</td>${cells}</tr>`;
-  }).join('');
-}
-function saveRight(role, moduleKey, checked){
-  const rights = loadRights();
-  rights[role][moduleKey] = checked;
-  saveRights(rights);
-  showToast(role+' access to "'+moduleKey+'" '+(checked?'enabled':'disabled'), 'success');
-  AppLogger.success('Module right updated by admin', {admin: currentUser.username, role: role, module: moduleKey, allowed: checked});
 }
 
 // =============================================
 // DATA
 // =============================================
 function loadAll(){
-  callData = JSON.parse(localStorage.getItem(SK)||'[]');
-  sops = JSON.parse(localStorage.getItem(SOK)||'[]');
+  callData = CLOUD.calls || [];
+  sops = CLOUD.sops || [];
 }
-function saveAll(){
-  localStorage.setItem(SK,JSON.stringify(callData));
+function saveAll(record, isNew){
+  if(record){ pushCall(record, isNew); }
+  else { CLOUD.calls = callData; }
 }
-function saveSops(){localStorage.setItem(SOK,JSON.stringify(sops));}
+function saveSops(deletedId){
+  if(deletedId!==undefined){ pushSopDelete(deletedId); }
+  else { pushSopAdd(sops[0]); }
+}
 
 function loadProfile(){
-  profiles = JSON.parse(localStorage.getItem(SPK)||'{}')||{};
+  profiles = CLOUD.profiles || {};
   const p = profiles[currentUser.name]||{};
   document.getElementById('pf-name').value = p.name||currentUser.name;
   document.getElementById('pf-code').value = p.code||'';
@@ -2041,7 +2430,7 @@ function saveProfile(){
     photo: profiles[currentUser.name]?.photo||null
   };
   profiles[currentUser.name]=data;
-  localStorage.setItem(SPK,JSON.stringify(profiles));
+  pushProfile(currentUser.name, data);
   document.getElementById('profileNameDisplay').textContent=data.name;
   document.getElementById('profileRoleDisplay').textContent=data.role||currentUser.team;
   showToast('Profile saved!','success');
@@ -2054,7 +2443,7 @@ function handlePhotoUpload(e){
     const uri = ev.target.result;
     if(!profiles[currentUser.name]) profiles[currentUser.name]={};
     profiles[currentUser.name].photo = uri;
-    localStorage.setItem(SPK,JSON.stringify(profiles));
+    pushProfile(currentUser.name, profiles[currentUser.name]);
     document.getElementById('profileInitial').style.display='none';
     const img = document.getElementById('profilePhoto');
     img.src=uri; img.style.display='block';
@@ -2091,12 +2480,20 @@ function showTab(tab, el){
   if(tab==='nonAmc') renderNonAmc();
   if(tab==='sops') renderSOPs();
   if(tab==='logs') renderLogs();
-  if(tab==='roles') showRolesSubtab('roles');
+  if(tab==='rolesRights') showRolesSubtab('roles');
   if(tab==='feedback'){
     const nameEl=document.getElementById('tl-name');
     if(nameEl && !nameEl.value && currentUser) nameEl.value = currentUser.name;
     const deptEl=document.getElementById('tl-dept');
     if(deptEl && !deptEl.value && currentUser) deptEl.value = currentUser.team;
+    if(canEditModule('feedback')){
+      document.getElementById('fbSubtab-submit').classList.add('active');
+      document.getElementById('fbSubtab-dashboard').classList.remove('active');
+      document.getElementById('fbPanel-submit').classList.add('active');
+      document.getElementById('fbPanel-dashboard').classList.remove('active');
+    } else {
+      showFeedbackSubtab('dashboard');
+    }
   }
   AppLogger.info('Navigated to tab', {tab: tab});
 }
@@ -2162,9 +2559,10 @@ function resetForm(){
   ['f-cust','f-loc','f-issue','f-jira','f-cname','f-cinfo','f-ver','f-serial','f-hrs','f-resp','f-analysis','f-res-action','f-remarks','f-support'].forEach(id=>{
     const e=document.getElementById(id); if(e) e.value='';
   });
-  ['f-region','f-plat','f-sys','f-rca','f-res'].forEach(id=>{
+  ['f-region','f-plat','f-sys','f-rca'].forEach(id=>{
     const e=document.getElementById(id); if(e) e.value='';
   });
+  if(currentUser) document.getElementById('f-res').value = currentUser.name;
   document.getElementById('f-priority').value='Medium';
   pills={amc:null,itype:null}; selectedStatus=null;
   document.querySelectorAll('.pill').forEach(p=>p.classList.remove('sel'));
@@ -2175,20 +2573,36 @@ function resetForm(){
   document.getElementById('f-rtime').value=now.toTimeString().slice(0,5);
   document.getElementById('f-resdate').value='';
 }
-function validateForm(){
-  const req = {'f-cust':'Customer Name','f-region':'Region','f-loc':'Location','f-issue':'Issue Description',
-    'f-res':'Primary Resource','f-rdate':'Reported Date','f-rtime':'Reported Time',
-    'f-analysis':'Service Analysis','f-res-action':'Resolution','f-rca':'Root Cause',
-    'f-plat':'Platform','f-sys':'System Type','f-cname':'Contact Name'};
-  for(const [id,label] of Object.entries(req)){
-    if(!document.getElementById(id).value.trim()){showToast('Fill: '+label,'error');return false;}
+function flagMissingField(id, sectionLabel, fieldLabel){
+  const el = document.getElementById(id);
+  showToast('Missing in "'+sectionLabel+'": '+fieldLabel, 'error');
+  if(el){
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+    el.classList.add('field-missing');
+    (el.focus ? el.focus() : null);
+    setTimeout(()=>el.classList.remove('field-missing'), 2200);
   }
-  if(!pills.amc){showToast('Select AMC status','error');return false;}
-  if(!pills.itype){showToast('Select Issue Type','error');return false;}
-  if(!selectedStatus){showToast('Select Call Status','error');return false;}
+}
+function validateForm(){
+  const req = {
+    'f-cust':['Customer Information','Customer Name'], 'f-region':['Customer Information','Region'],
+    'f-loc':['Customer Information','Location'], 'f-cname':['Customer Information','Contact Name'],
+    'f-issue':['Issue Details','Issue Description'], 'f-rdate':['Issue Details','Reported Date'],
+    'f-rtime':['Issue Details','Reported Time'],
+    'f-plat':['Technical Classification','Platform'], 'f-sys':['Technical Classification','System Type'],
+    'f-analysis':['Analysis & Resolution','Service Analysis'], 'f-res-action':['Analysis & Resolution','Resolution'],
+    'f-rca':['Root Cause & Status','Root Cause']
+  };
+  for(const [id,[section,label]] of Object.entries(req)){
+    if(!document.getElementById(id).value.trim()){ flagMissingField(id, section, label); return false; }
+  }
+  if(!pills.amc){ flagMissingField('g-amc','Customer Information','Under AMC?'); return false; }
+  if(!pills.itype){ flagMissingField('g-itype','Technical Classification','Issue Type'); return false; }
+  if(!selectedStatus){ flagMissingField('g-status','Root Cause & Status','Call Status'); return false; }
   return true;
 }
 function submitCall(){
+  if(!guardEdit('callLog','logging a call')) return;
   if(!validateForm()) return;
   const r = {
     id:Date.now(), loggedBy:document.getElementById('f-by').value,
@@ -2217,7 +2631,7 @@ function submitCall(){
       action:'Call Logged', comment:'Initial log: '+selectedStatus}]
   };
   callData.unshift(r);
-  saveAll();
+  saveAll(r, true);
   rebuildDatalist();
   renderAll();
   resetForm();
@@ -2235,6 +2649,7 @@ function getOpenCalls(){
   return callData.filter(c=>['Open','InProcess','Under Observation','Customer Confirmation Pending'].includes(c.status));
 }
 function openCloseModal(id){
+  if(!guardEdit('updating/closing a call')) return;
   closingCallId=id;
   const c=callData.find(x=>x.id===id);
   document.getElementById('closeCallInfo').innerHTML=`
@@ -2261,7 +2676,7 @@ function submitCloseCall(){
   callData[idx].timeline.push({by,time:new Date().toISOString(),action:newStatus==='Closed'?'Call Closed':'Status Updated',comment});
   callData[idx].status=newStatus;
   if(newStatus==='Closed') callData[idx].resolveDate=document.getElementById('cc-resdate').value;
-  saveAll();
+  saveAll(callData[idx], false);
   closeCloseModal();
   renderAll();
   checkOpenCallsAlert();
@@ -2331,14 +2746,17 @@ function rebuildDatalist(){
 // DASHBOARD
 // =============================================
 function countBy(data,field){const m={};data.forEach(d=>{const v=d[field]||'Unknown';m[v]=(m[v]||0)+1});return m;}
-function mkChart(id,type,obj,colors){
+function mkChart(id,type,obj,colors,onClickLabel){
   const ctx=document.getElementById(id); if(!ctx) return;
   if(charts[id]){charts[id].destroy();}
+  const labels=Object.keys(obj);
   charts[id]=new Chart(ctx.getContext('2d'),{
-    type,data:{labels:Object.keys(obj),datasets:[{data:Object.values(obj),
-      backgroundColor:colors||Object.keys(obj).map((_,i)=>`hsl(${i*37},65%,50%)`),
+    type,data:{labels,datasets:[{data:Object.values(obj),
+      backgroundColor:colors||labels.map((_,i)=>`hsl(${i*37},65%,50%)`),
       borderWidth:type==='doughnut'?2:0,borderRadius:type==='bar'?4:0,borderColor:'#fff'}]},
-    options:{responsive:true,plugins:{legend:{position:type==='doughnut'?'right':'top',labels:{font:{size:10},boxWidth:11}}},
+    options:{responsive:true,
+      onClick: onClickLabel ? (evt,els)=>{ if(els&&els.length) onClickLabel(labels[els[0].index]); } : undefined,
+      plugins:{legend:{position:type==='doughnut'?'right':'top',labels:{font:{size:10},boxWidth:11}}},
       scales:type==='bar'?{y:{beginAtZero:true,ticks:{font:{size:9}},grid:{color:'#f5f5f5'}},x:{ticks:{font:{size:9}},grid:{display:false}}}:{}}
   });
 }
@@ -2406,15 +2824,12 @@ function filterData(){
   const mb=(document.getElementById('fMember')||{}).value||'';
   const dt=(document.getElementById('fDate')||{}).value||'';
   const sh=(document.getElementById('fShift')||{}).value||'';
-  const today=datStr(new Date()),ws=getWeekStart(),now=new Date();
   return callData.filter(c=>{
     if(s&&![c.customer,c.issue,c.resource,c.rootCause,c.platform,c.systemType,c.location].join(' ').toLowerCase().includes(s)) return false;
     if(st&&c.status!==st) return false;
     if(mb&&c.resource!==mb&&!(c.supportResource||'').includes(mb)) return false;
     if(sh&&c.shift!==sh) return false;
-    if(dt==='today'&&c.logDate!==today) return false;
-    if(dt==='week'&&new Date(c.logDate)<ws) return false;
-    if(dt==='month'){const d=new Date(c.logDate);if(d.getMonth()!==now.getMonth()||d.getFullYear()!==now.getFullYear()) return false;}
+    if(dt&&(c.reportDate||c.logDate)!==dt) return false;
     return true;
   });
 }
@@ -2445,6 +2860,7 @@ function renderTable(){
 }
 function showDetailModal(id){
   const c=callData.find(x=>x.id===id); if(!c) return;
+  document.getElementById('detailModalTitle').textContent = '📋 Call Detail';
   const tl=(c.timeline||[]).map(t=>`
     <div class="timeline-item">
       <div class="tl-dot ${t.action==='Call Closed'?'red':''}" style="margin-top:3px"></div>
@@ -2470,7 +2886,7 @@ function showDetailModal(id){
       ${c.remarks?`<div style="grid-column:1/-1">${dItem('Remarks',c.remarks)}</div>`:''}
     </div>
     ${tl?`<div style="margin-top:16px"><div style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--text)">📋 Resolution Timeline</div>${tl}</div>`:''}
-    ${!['Closed'].includes(c.status)?`<div style="margin-top:16px"><button class="btn-primary" onclick="openCloseModal(${c.id});document.getElementById('detailModal').classList.remove('open')">🔄 Update / Close This Call</button></div>`:''}
+    ${(!['Closed'].includes(c.status) && canEditCalls())?`<div style="margin-top:16px"><button class="btn-primary" onclick="openCloseModal(${c.id});document.getElementById('detailModal').classList.remove('open')">🔄 Update / Close This Call</button></div>`:''}
   `;
   document.getElementById('detailModal').classList.add('open');
 }
@@ -2530,7 +2946,7 @@ function renderOpenCalls(){
       </div>
       ${tl.length?`<div class="occ-timeline"><div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase">Resolution Timeline</div>${tlHtml}</div>`:''}
       <div class="occ-actions">
-        <button class="btn-primary" onclick="openCloseModal(${c.id})" style="font-size:11px;padding:7px 14px">✏️ Update / Close</button>
+        ${canEditCalls()?`<button class="btn-primary" onclick="openCloseModal(${c.id})" style="font-size:11px;padding:7px 14px">✏️ Update / Close</button>`:''}
         <button class="btn-secondary" onclick="showDetailModal(${c.id})" style="font-size:11px;padding:7px 14px">👁 View Full Detail</button>
       </div>
     </div>`;
@@ -2656,6 +3072,7 @@ function renderChampion(){
 // =============================================
 const SOP_ICONS={Text:'📝',PDF:'📕',Word:'📘',PowerPoint:'📙',Excel:'📗',Video:'🎥'};
 function openSopModal(){
+  if(!guardEdit('sops','adding an SOP')) return;
   pills.sopformat=null;
   document.querySelectorAll('#g-sopformat .pill').forEach(p=>p.classList.remove('sel'));
   document.getElementById('sop-title').value='';
@@ -2667,6 +3084,7 @@ function openSopModal(){
   document.getElementById('sopModal').classList.add('open');
 }
 function submitSOP(){
+  if(!guardEdit('sops','adding an SOP')) return;
   const title=document.getElementById('sop-title').value.trim();
   const cat=document.getElementById('sop-cat').value;
   if(!title||!cat||!pills.sopformat){showToast('Fill title, category and format','error');return;}
@@ -2700,7 +3118,7 @@ function renderSOPs(){
       </div>
       <div class="sop-actions">
         ${s.text?`<button class="btn-teal" style="font-size:11px;padding:6px 12px" onclick="viewSOPText(${s.id})">👁 View</button>`:''}
-        <button class="btn-secondary" style="font-size:11px;padding:6px 10px;color:var(--red);border-color:var(--red)" onclick="deleteSOP(${s.id})">🗑</button>
+        ${canEditModule('sops')?`<button class="btn-secondary" style="font-size:11px;padding:6px 10px;color:var(--red);border-color:var(--red)" onclick="deleteSOP(${s.id})">🗑</button>`:''}
       </div>
     </div>`).join('');
 }
@@ -2712,8 +3130,9 @@ function viewSOPText(id){
   document.getElementById('detailModal').classList.add('open');
 }
 function deleteSOP(id){
+  if(!guardEdit('sops','deleting an SOP')) return;
   if(!confirm('Delete this SOP?')) return;
-  sops=sops.filter(s=>s.id!==id); saveSops(); renderSOPs();
+  sops=sops.filter(s=>s.id!==id); saveSops(id); renderSOPs();
 }
 
 // =============================================
@@ -2837,12 +3256,23 @@ function sendMailReport(){
   if(sh) data=data.filter(c=>c.shift===sh);
   const closed=data.filter(c=>c.status==='Closed').length;
   const hrs=data.reduce((s,c)=>s+(c.hours||0),0);
-  let body=`ACGI 24×7 Support — ${sh||'All'} Shift Report\nDate: ${dt||'All'}\nGenerated by: ${currentUser.name}\n\n`;
-  body+=`SUMMARY\n${'='.repeat(40)}\nTotal: ${data.length} | Closed: ${closed} | Open: ${data.length-closed} | Hours: ${hrs.toFixed(1)}h\n\nDETAILS\n${'='.repeat(40)}\n`;
-  data.forEach((c,i)=>{body+=`\n[${i+1}] ${c.customer} (${c.region})\n    Issue: ${c.issue.slice(0,80)}\n    Status: ${c.status} | RCA: ${c.rootCause} | By: ${c.resource} | ${c.hours}h\n`;});
+  const clean=v=>String(v==null?'':v).replace(/[\r\n\t]+/g,' ').trim();
+  let body=`ACGI 24×7 Support — ${sh||'All'} Shift Report\nDate: ${dt||'All'}\nGenerated by: ${currentUser.name}\n`;
+  body+=`Total: ${data.length}  |  Closed: ${closed}  |  Open: ${data.length-closed}  |  Hours: ${hrs.toFixed(1)}h\n\n`;
+  body+=`(Tip: select from "Sr" below through the last row, copy, and paste directly into Excel — it will land in proper columns.)\n\n`;
+  const headers=['Sr','Date','Time','Shift','Logged By','Customer','Region','Location','AMC','Contact Name',
+    'Contact Info','Issue','JIRA','Primary Resource','Support Resource','Issue Type','Platform','System',
+    'Version','Serial','Priority','First Response (mins)','Root Cause','Analysis','Resolution','Remarks',
+    'Hours','Status'];
+  const rows=data.map((c,i)=>[i+1,c.reportDate||c.logDate,c.reportTime||c.logTime,c.shift,c.loggedBy,c.customer,
+    c.region,c.location,c.amc,c.contactName,c.contactInfo,c.issue,c.jira,c.resource,c.supportResource||'',
+    c.issueType,c.platform,c.systemType,c.version,c.serial,c.priority||'Medium',c.responseTime||0,c.rootCause,
+    c.analysis,c.resolution,c.remarks,c.hours,c.status].map(clean));
+  body += headers.join('\t') + '\n';
+  rows.forEach(r=>{ body += r.join('\t') + '\n'; });
   window.open('mailto:'+to+'?subject='+encodeURIComponent('ACGI Support Report — '+sh+' — '+dt)+'&body='+encodeURIComponent(body));
   closeMailModal(); showToast('Mail opened!','success');
-  AppLogger.info('Shift report emailed', {shift:sh, date:dt, recipients:to});
+  AppLogger.info('Shift report emailed', {shift:sh, date:dt, recipients:to, rows:data.length});
 }
 
 // =============================================
@@ -2864,8 +3294,6 @@ document.querySelectorAll('.modal-overlay').forEach(el=>{
 // Renamed MEMBERS->FB_MEMBERS and init->initFeedbackModule
 // to avoid colliding with the call-logger's own globals.
 // =============================================
-const POWER_AUTOMATE_URL = "https://ff82f6be056be446a14a4bfdc1141b.d9.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/ff416cf0a3c045118c5442d20267c3ba/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=mHa4LKLNT9R30visTKxJA9Ru4C5zj7jVYU6DKyhGSfc";
-
 const FB_MEMBERS = [
   {name:"Pawan",      col:"#6C4EF2"},
   {name:"Sri Harsha", col:"#CC2229"},
@@ -2880,7 +3308,7 @@ const EMOJIS = ["😣","😟","😑","😐","🙂","😊","😃","💪","🔥","
 let fbCur = 0, commR = {}, perfR = {}, lastPayload = null;
 
 function initFeedbackModule() {
-  if (POWER_AUTOMATE_URL === "YOUR_POWER_AUTOMATE_URL_HERE") {
+  if (!isSupabaseConfigured()) {
     document.getElementById("cfg-banner").style.display = "block";
   }
   buildStarGrid("comm-grid", commR, "comm");
@@ -2949,7 +3377,229 @@ function goTo(pg) {
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
+// =============================================
+// TEAM FEEDBACK — sub-tab switcher, dashboard, detail view
+// =============================================
+function fbFieldKey(name){ return name.toLowerCase().replace(/\s+/g,'_'); }
+function showFeedbackSubtab(which){
+  if(which==='submit' && !guardEdit('feedback','submitting team feedback')){ return; }
+  document.getElementById('fbSubtab-submit').classList.toggle('active', which==='submit');
+  document.getElementById('fbSubtab-dashboard').classList.toggle('active', which==='dashboard');
+  document.getElementById('fbPanel-submit').classList.toggle('active', which==='submit');
+  document.getElementById('fbPanel-dashboard').classList.toggle('active', which==='dashboard');
+  if(which==='dashboard') renderFeedbackDashboard();
+}
+
+// The free-text fields in a feedback submission, each with a label/icon
+// used to build the "Team Voice" comments feed.
+const FB_TEXT_FIELDS = [
+  {key:'collaboration_notes',   tag:'🤝 Collaboration'},
+  {key:'problem_solving_notes', tag:'🧩 Problem-Solving'},
+  {key:'workload_notes',        tag:'⚖️ Workload'},
+  {key:'support_notes',         tag:'🛡️ Support'},
+  {key:'morale_notes',          tag:'🌡️ Morale'},
+  {key:'meeting_notes',         tag:'📅 Meetings'},
+  {key:'leadership_strength',   tag:'🪞 Leadership Strength'},
+  {key:'leadership_improve',    tag:'🪞 Leadership — Improving'},
+  {key:'alignment_plan',        tag:'🔭 Alignment Plan'},
+  {key:'excellence_examples',   tag:'💡 Excellence Example'}
+];
+const FB_STOPWORDS = new Set(['this','that','with','have','from','they','will','would','could','should','their','there','about','which','being','into','more','some','such','than','then','them','these','those','were','been','over','also','when','what','where','while','just','only','very','much','many','like','need','needs','needed','make','making','made','well','good','team','member','members']);
+
+function getFeedbackFilters(){
+  return {
+    lead: (document.getElementById('fbf-lead')||{}).value || '',
+    dept: (document.getElementById('fbf-dept')||{}).value || '',
+    from: (document.getElementById('fbf-from')||{}).value || '',
+    to: (document.getElementById('fbf-to')||{}).value || '',
+    q: ((document.getElementById('fbf-search')||{}).value || '').toLowerCase().trim()
+  };
+}
+function resetFeedbackFilters(){
+  ['fbf-lead','fbf-dept','fbf-from','fbf-to','fbf-search'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  renderFeedbackDashboard();
+}
+function fbSetFilterAndRender(field, value){
+  const el = document.getElementById(field);
+  if(!el) return;
+  el.value = value;
+  renderFeedbackDashboard();
+}
+function populateFeedbackFilterOptions(allData){
+  const leadSel = document.getElementById('fbf-lead'), deptSel = document.getElementById('fbf-dept');
+  const curLead = leadSel.value, curDept = deptSel.value;
+  const leads = [...new Set(allData.map(d=>d.team_lead_name).filter(Boolean))].sort();
+  const depts = [...new Set(allData.map(d=>d.department).filter(Boolean))].sort();
+  leadSel.innerHTML = '<option value="">All Team Leads</option>' + leads.map(l=>`<option value="${l}" ${l===curLead?'selected':''}>${l}</option>`).join('');
+  deptSel.innerHTML = '<option value="">All Departments</option>' + depts.map(d=>`<option value="${d}" ${d===curDept?'selected':''}>${d}</option>`).join('');
+}
+function getFilteredFeedback(){
+  const all = CLOUD.feedbackSubmissions || [];
+  const f = getFeedbackFilters();
+  return all.filter(d=>{
+    if(f.lead && d.team_lead_name !== f.lead) return false;
+    if(f.dept && d.department !== f.dept) return false;
+    const day = (d.created_at||'').slice(0,10);
+    if(f.from && day && day < f.from) return false;
+    if(f.to && day && day > f.to) return false;
+    if(f.q){
+      const hay = [d.team_lead_name,d.department,...FB_TEXT_FIELDS.map(t=>d[t.key]),d.top_collaborators,d.morale_tags,d.focus_areas,d.workload_status].join(' ').toLowerCase();
+      if(!hay.includes(f.q)) return false;
+    }
+    return true;
+  });
+}
+function renderFeedbackDashboard(){
+  const all = CLOUD.feedbackSubmissions || [];
+  populateFeedbackFilterOptions(all);
+  const data = getFilteredFeedback();
+  const f = getFeedbackFilters();
+  const filtersActive = !!(f.lead||f.dept||f.from||f.to||f.q);
+
+  document.getElementById('fbk-total').textContent = data.length;
+  document.getElementById('fbk-total-sub').textContent = filtersActive ? `of ${all.length} total` : 'All time';
+  document.getElementById('fbk-leads').textContent = new Set(data.map(d=>d.team_lead_name)).size;
+
+  document.getElementById('fb-empty').style.display = data.length ? 'none' : 'block';
+  document.getElementById('fb-charts-wrap').style.display = data.length ? '' : 'none';
+  document.getElementById('fb-empty-msg').textContent = all.length && !data.length
+    ? 'No feedback matches these filters — try Reset.'
+    : 'No feedback submitted yet. Once a team lead submits the survey, results will appear here for everyone to see.';
+  if(!data.length) return;
+
+  const dimFields = {problem_solving_rating:'Problem-Solving', support_rating:'Support', meeting_rating:'Meetings', leadership_rating:'Leadership'};
+  let dimSum=0, dimCount=0;
+  const dimAvgs = {};
+  Object.keys(dimFields).forEach(k=>{
+    const vals = data.map(d=>parseFloat(d[k])).filter(v=>!isNaN(v)&&v>0);
+    dimAvgs[dimFields[k]] = vals.length ? +(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2) : 0;
+    dimSum += vals.reduce((a,b)=>a+b,0); dimCount += vals.length;
+  });
+  document.getElementById('fbk-avg').textContent = dimCount ? (dimSum/dimCount).toFixed(1) : '—';
+
+  const latest = data.reduce((max,d)=>{ const t=new Date(d.created_at||d.timestamp||0); return (!max||t>max)?t:max; }, null);
+  document.getElementById('fbk-latest').textContent = latest ? latest.toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—';
+
+  const commAvgs = {}, perfAvgs = {};
+  FB_MEMBERS.forEach(m=>{
+    const key = fbFieldKey(m.name);
+    const commVals = data.map(d=>parseFloat(d['comm_'+key])).filter(v=>!isNaN(v)&&v>0);
+    const perfVals = data.map(d=>parseFloat(d['perf_'+key])).filter(v=>!isNaN(v)&&v>0);
+    commAvgs[m.name] = commVals.length ? +(commVals.reduce((a,b)=>a+b,0)/commVals.length).toFixed(2) : 0;
+    perfAvgs[m.name] = perfVals.length ? +(perfVals.reduce((a,b)=>a+b,0)/perfVals.length).toFixed(2) : 0;
+  });
+  mkChart('fbChartComm','bar',commAvgs, FB_MEMBERS.map(m=>m.col), (name)=>fbSetFilterAndRender('fbf-search', name.toLowerCase()));
+  mkChart('fbChartPerf','bar',perfAvgs, FB_MEMBERS.map(m=>m.col), (name)=>fbSetFilterAndRender('fbf-search', name.toLowerCase()));
+  mkChart('fbChartDims','bar',dimAvgs);
+
+  const tally = (field)=>{
+    const counts = {};
+    data.forEach(d=>(d[field]||'').split(',').map(s=>s.trim()).filter(v=>v && v!=='NA').forEach(v=>counts[v]=(counts[v]||0)+1));
+    return counts;
+  };
+  mkChart('fbChartCollab','bar', tally('top_collaborators'), null, (name)=>fbSetFilterAndRender('fbf-search', name.toLowerCase()));
+  mkChart('fbChartMorale','doughnut', tally('morale_tags'), null, (tag)=>fbSetFilterAndRender('fbf-search', tag.toLowerCase()));
+  mkChart('fbChartFocus','bar', tally('focus_areas'), null, (tag)=>fbSetFilterAndRender('fbf-search', tag.toLowerCase()));
+
+  renderThemeCloud(data);
+  renderCommentsFeed(data, f.q);
+
+  const sorted = data.slice().sort((a,b)=> new Date(b.created_at||b.timestamp||0) - new Date(a.created_at||a.timestamp||0));
+  document.getElementById('fbSubmissionsBody').innerHTML = sorted.map(d=>{
+    const dt = d.submission_date || (d.created_at ? new Date(d.created_at).toLocaleDateString('en-IN') : '—');
+    return `<tr><td>${dt}</td><td>${d.team_lead_name||'—'}</td><td>${d.department||'—'}</td><td><button class="btn-secondary" style="font-size:11px;padding:6px 10px" onclick="showFeedbackDetail(${d.id})">👁 View</button></td></tr>`;
+  }).join('');
+}
+// Lightweight keyword mining across every free-text answer — no library needed.
+function renderThemeCloud(data){
+  const counts = {};
+  data.forEach(d=>{
+    FB_TEXT_FIELDS.forEach(t=>{
+      const text = (d[t.key]||'');
+      if(!text || text==='NA') return;
+      (text.toLowerCase().match(/[a-z']{4,}/g)||[]).forEach(w=>{
+        if(FB_STOPWORDS.has(w)) return;
+        counts[w] = (counts[w]||0)+1;
+      });
+    });
+  });
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  const el = document.getElementById('fbThemeCloud');
+  if(!top.length){ el.innerHTML = '<span style="color:var(--muted);font-size:12px">Not enough written feedback yet to spot themes.</span>'; return; }
+  const maxCount = top[0][1];
+  el.innerHTML = top.map(([word,count])=>{
+    const size = 11 + Math.round((count/maxCount)*11); // 11px .. 22px
+    return `<span class="theme-chip" style="font-size:${size}px" onclick="fbSetFilterAndRender('fbf-search','${word}')" title="Mentioned ${count} time${count>1?'s':''}">${word}</span>`;
+  }).join('');
+}
+// Collects every non-empty free-text answer across the filtered submissions into one feed
+function renderCommentsFeed(data, searchTerm){
+  const sorted = data.slice().sort((a,b)=> new Date(b.created_at||b.timestamp||0) - new Date(a.created_at||a.timestamp||0));
+  let entries = [];
+  sorted.forEach(d=>{
+    const when = d.created_at ? new Date(d.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : (d.submission_date||'');
+    FB_TEXT_FIELDS.forEach(t=>{
+      const text = (d[t.key]||'').trim();
+      if(!text || text==='NA') return;
+      entries.push({who:d.team_lead_name||'Anonymous', dept:d.department, when, tag:t.tag, text});
+    });
+  });
+  document.getElementById('fbCommentsCount').textContent = entries.length+' written comment'+(entries.length===1?'':'s')+(searchTerm?' matching "'+searchTerm+'"':'')+' from '+new Set(sorted.map(d=>d.team_lead_name)).size+' team lead(s).';
+  const feedEl = document.getElementById('fbCommentsFeed');
+  if(!entries.length){ feedEl.innerHTML = '<p style="color:var(--muted);font-size:12px;padding:10px 0">No written comments in this selection.</p>'; return; }
+  feedEl.innerHTML = entries.slice(0,120).map(e=>`
+    <div class="fb-comment-card">
+      <div class="fb-comment-hd">
+        <div><span class="fb-comment-tag">${e.tag}</span><span class="fb-comment-who">${e.who}</span>${e.dept?' <span style="color:var(--muted);font-size:11px">· '+e.dept+'</span>':''}</div>
+        <div class="fb-comment-when">${e.when}</div>
+      </div>
+      <div class="fb-comment-text">${e.text}</div>
+    </div>`).join('');
+}
+function showFeedbackDetail(id){
+  const d = (CLOUD.feedbackSubmissions||[]).find(x=>x.id===id); if(!d) return;
+  document.getElementById('detailModalTitle').textContent = '💬 Feedback Detail';
+  const dt = d.submission_date || (d.created_at ? new Date(d.created_at).toLocaleDateString('en-IN') : '—');
+  const commRows = FB_MEMBERS.map(m=>`<div>${m.name}: <strong>${d['comm_'+fbFieldKey(m.name)]||'—'}/5</strong></div>`).join('');
+  const perfRows = FB_MEMBERS.map(m=>`<div>${m.name}: <strong>${d['perf_'+fbFieldKey(m.name)]||'—'}/5</strong></div>`).join('');
+  document.getElementById('detailContent').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin-bottom:16px">
+      <div><strong>Team Lead:</strong> ${d.team_lead_name||'—'}</div>
+      <div><strong>Department:</strong> ${d.department||'—'}</div>
+      <div><strong>Submitted:</strong> ${dt}</div>
+    </div>
+    <h3 style="margin-bottom:8px">💬 Communication Ratings</h3>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px;font-size:12px;margin-bottom:14px">${commRows}</div>
+    <h3 style="margin-bottom:8px">🤝 Top Collaborators</h3>
+    <p style="font-size:12px;margin-bottom:4px">${d.top_collaborators||'—'}</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">${d.collaboration_notes||''}</p>
+    <h3 style="margin-bottom:8px">🧩 Problem-Solving (${d.problem_solving_rating||'—'}/10)</h3>
+    <p style="font-size:12px;margin-bottom:14px">${d.problem_solving_notes||'—'}</p>
+    <h3 style="margin-bottom:8px">⚖️ Workload</h3>
+    <p style="font-size:12px;margin-bottom:4px">${d.workload_status||'—'}</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">${d.workload_notes||''}</p>
+    <h3 style="margin-bottom:8px">🛡️ Support &amp; Guidance (${d.support_rating||'—'}/10)</h3>
+    <p style="font-size:12px;margin-bottom:14px">${d.support_notes||'—'}</p>
+    <h3 style="margin-bottom:8px">🌡️ Team Morale</h3>
+    <p style="font-size:12px;margin-bottom:4px">${d.morale_tags||'—'}</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">${d.morale_notes||''}</p>
+    <h3 style="margin-bottom:8px">📅 Meeting Effectiveness (${d.meeting_rating||'—'}/10)</h3>
+    <p style="font-size:12px;margin-bottom:14px">${d.meeting_notes||'—'}</p>
+    <h3 style="margin-bottom:8px">📊 Performance Ratings</h3>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px;font-size:12px;margin-bottom:14px">${perfRows}</div>
+    <h3 style="margin-bottom:8px">🪞 Leadership Self-Review (${d.leadership_rating||'—'}/10)</h3>
+    <p style="font-size:12px;margin-bottom:4px"><strong>Strength:</strong> ${d.leadership_strength||'—'}</p>
+    <p style="font-size:12px;margin-bottom:14px"><strong>Improving:</strong> ${d.leadership_improve||'—'}</p>
+    <h3 style="margin-bottom:8px">🔭 Next Quarter</h3>
+    <p style="font-size:12px;margin-bottom:4px"><strong>Focus Areas:</strong> ${d.focus_areas||'—'}</p>
+    <p style="font-size:12px;margin-bottom:4px"><strong>Alignment Plan:</strong> ${d.alignment_plan||'—'}</p>
+    <p style="font-size:12px">${d.excellence_examples||''}</p>
+  `;
+  document.getElementById('detailModal').classList.add('open');
+}
+
 function startFeedback() {
+  if(!guardEdit('feedback','submitting team feedback')) return;
   const n = fbv("tl-name").trim();
   if (!n) { fbShow("e0"); return; }
   fbHide("e0");
@@ -2984,7 +3634,6 @@ async function submitFeedback() {
   if (!focus || !align) { fbShow("e10"); return; }
   fbHide("e10");
   const payload = {
-  timestamp: new Date().toISOString(),
   submission_date: new Date().toLocaleDateString("en-IN"),
 
   team_lead_name: fbv("tl-name") || "NA",
@@ -3037,24 +3686,15 @@ async function submitFeedback() {
   document.getElementById("pgload").classList.add("active");
   window.scrollTo({top:0,behavior:"smooth"});
   AppLogger.info('Feedback submission started', {teamLead:payload.team_lead_name});
-  try {
-    const res = await fetch(POWER_AUTOMATE_URL, {
-      method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)
-    });
-    document.getElementById("pgload").classList.remove("active");
-    if (res.ok || res.status === 202) {
-      document.getElementById("pgsucc").classList.add("active");
-      AppLogger.success('Feedback submitted successfully', {teamLead:payload.team_lead_name});
-    } else {
-      document.getElementById("err-detail").textContent = "Server responded with status "+res.status+". Please contact your administrator.";
-      document.getElementById("pgerr").classList.add("active");
-      AppLogger.error('Feedback submission failed — server error', {status:res.status});
-    }
-  } catch(err) {
-    document.getElementById("pgload").classList.remove("active");
-    document.getElementById("err-detail").textContent = "Network error: "+(err.message||"Could not reach server.");
+  const result = await pushFeedback(payload);
+  document.getElementById("pgload").classList.remove("active");
+  if (result.ok) {
+    document.getElementById("pgsucc").classList.add("active");
+    AppLogger.success('Feedback submitted successfully', {teamLead:payload.team_lead_name});
+  } else {
+    document.getElementById("err-detail").textContent = result.error || "Could not save your feedback. Please try again.";
     document.getElementById("pgerr").classList.add("active");
-    AppLogger.error('Feedback submission failed — network error', {message: err.message||String(err)});
+    AppLogger.error('Feedback submission failed', {message: result.error});
   }
 }
 
@@ -3063,24 +3703,15 @@ async function retrySubmit() {
   document.getElementById("pgerr").classList.remove("active");
   document.getElementById("pgload").classList.add("active");
   AppLogger.info('Retrying feedback submission', {teamLead:lastPayload.team_lead_name});
-  try {
-    const res = await fetch(POWER_AUTOMATE_URL, {
-      method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(lastPayload)
-    });
-    document.getElementById("pgload").classList.remove("active");
-    if (res.ok || res.status === 202) {
-      document.getElementById("pgsucc").classList.add("active");
-      AppLogger.success('Feedback submitted successfully on retry', {teamLead:lastPayload.team_lead_name});
-    } else {
-      document.getElementById("err-detail").textContent = "Status "+res.status+" — contact the administrator.";
-      document.getElementById("pgerr").classList.add("active");
-      AppLogger.error('Feedback retry failed — server error', {status:res.status});
-    }
-  } catch(err) {
-    document.getElementById("pgload").classList.remove("active");
-    document.getElementById("err-detail").textContent = err.message;
+  const result = await pushFeedback(lastPayload);
+  document.getElementById("pgload").classList.remove("active");
+  if (result.ok) {
+    document.getElementById("pgsucc").classList.add("active");
+    AppLogger.success('Feedback submitted successfully on retry', {teamLead:lastPayload.team_lead_name});
+  } else {
+    document.getElementById("err-detail").textContent = result.error || "Could not save your feedback. Please try again.";
     document.getElementById("pgerr").classList.add("active");
-    AppLogger.error('Feedback retry failed — network error', {message: err.message||String(err)});
+    AppLogger.error('Feedback retry failed', {message: result.error});
   }
 }
 
