@@ -678,6 +678,17 @@ tr:hover td{background:#f8f9ff}
 .cobra-label{margin-top:6px;background:var(--dark);color:#fff;font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:100px;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.25)}
 .nav-guided-pulse{animation:navPulse 1s ease-in-out 4}
 @keyframes navPulse{0%,100%{background:rgba(46,204,113,0)}50%{background:rgba(46,204,113,.25)}}
+
+/* =============================================
+   MEMBER TYPEAHEAD — real registered users only,
+   no native select/datalist popup
+============================================= */
+.ta-wrap{position:relative}
+.ta-results{position:absolute;top:calc(100% + 4px);left:0;min-width:200px;max-width:280px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.15);z-index:200;display:none;max-height:220px;overflow-y:auto}
+.ta-item{padding:9px 13px;font-size:12.5px;cursor:pointer;border-bottom:1px solid #f1f2f6}
+.ta-item:last-child{border-bottom:none}
+.ta-item:hover,.ta-item.active{background:var(--red-light);color:var(--red2)}
+.ta-empty{padding:10px 13px;font-size:11.5px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -994,12 +1005,7 @@ tr:hover td{background:#f8f9ff}
 
           <div class="fld"><label>Primary Resource</label><input id="f-res" readonly></div>
           <div class="fld"><label>Supporting Resource(s)</label>
-            <input id="f-support" placeholder="e.g. Talha, Ganesh" list="memberDl">
-            <datalist id="memberDl">
-              <option>Sri Harsha</option><option>Talha</option><option>Deshraj</option>
-              <option>Vivek</option><option>Ganesh</option><option>Ashutosh</option><option>Pawan</option>
-              <option>Niranjan</option>
-            </datalist>
+            <input id="f-support" placeholder="Type to search and select…">
           </div>
           <div class="fld"><label class="req">First Response Time (mins)</label><input type="number" id="f-resp" placeholder="e.g. 15" min="0"></div>
           <div class="fld"><label class="req">Minutes Worked</label><input type="number" id="f-hrs" placeholder="e.g. 90" step="1" min="0"></div>
@@ -1133,7 +1139,7 @@ tr:hover td{background:#f8f9ff}
           <option>Under Observation</option><option>Customer Confirmation Pending</option>
         </select>
         <div style="display:flex;align-items:center;gap:4px">
-          <input type="text" id="fMember" list="memberDl" placeholder="🔎 Search member…" oninput="renderTable()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;min-width:150px">
+          <input type="text" id="fMember" placeholder="🔎 Type to search a member…" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;min-width:150px">
           <button class="btn-secondary" onclick="document.getElementById('fMember').value='';renderTable()" title="Clear member filter" style="padding:8px 10px">✕</button>
         </div>
         <div class="fi-date-wrap" style="display:flex;align-items:center;gap:4px">
@@ -1180,12 +1186,10 @@ tr:hover td{background:#f8f9ff}
           <option value="Under Observation">Under Observation</option>
           <option value="Customer Confirmation Pending">Customer Pending</option>
         </select>
-        <select id="ocMember" onchange="renderOpenCalls()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px">
-          <option value="">All Members</option>
-          <option>Sri Harsha</option><option>Talha</option><option>Deshraj</option>
-          <option>Vivek</option><option>Ganesh</option><option>Ashutosh</option><option>Pawan</option>
-          <option>Niranjan</option>
-        </select>
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="text" id="ocMember" placeholder="🔎 Type to search a member…" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;min-width:150px">
+          <button class="btn-secondary" onclick="document.getElementById('ocMember').value='';renderOpenCalls()" title="Clear member filter" style="padding:8px 10px">✕</button>
+        </div>
       </div>
 
       <div id="openCallsList"></div>
@@ -1206,6 +1210,7 @@ tr:hover td{background:#f8f9ff}
         <span style="font-size:11px;color:var(--muted)">to</span>
         <input type="date" id="champTo" onchange="renderChampion()" title="To date">
         <button class="btn-secondary" onclick="document.getElementById('champFrom').value='';document.getElementById('champTo').value='';renderChampion()" title="Clear date range" style="padding:8px 10px">✕</button>
+        <button class="btn-secondary" onclick="syncTabData('renderChampion', this)" title="Pull the latest call data" style="padding:8px 12px;margin-left:auto">🔄 Sync Data</button>
       </div>
 
       <div id="champPodium" style="text-align:center;margin-bottom:24px"></div>
@@ -1227,6 +1232,7 @@ tr:hover td{background:#f8f9ff}
         <span style="font-size:11px;color:var(--muted)">to</span>
         <input type="date" id="perfTo" onchange="renderPerformance()" title="To date">
         <button class="btn-secondary" onclick="document.getElementById('perfFrom').value='';document.getElementById('perfTo').value='';renderPerformance()" title="Clear date range" style="padding:8px 10px">✕</button>
+        <button class="btn-secondary" onclick="syncTabData('renderPerformance', this)" title="Pull the latest call data" style="padding:8px 12px;margin-left:auto">🔄 Sync Data</button>
       </div>
       <div class="member-grid" id="perfGrid"></div>
       <div class="chart-grid">
@@ -1247,6 +1253,7 @@ tr:hover td{background:#f8f9ff}
           <option value="">All Types</option>
           <option>Text</option><option>PDF</option><option>Word</option><option>PowerPoint</option><option>Excel</option><option>Video</option>
         </select>
+        <button class="btn-secondary" onclick="syncTabData('renderSOPs', this)" title="Pull the latest SOPs" style="padding:8px 12px;margin-left:auto">🔄 Sync Data</button>
       </div>
       <div id="sopList"></div>
     </div>
@@ -1254,6 +1261,7 @@ tr:hover td{background:#f8f9ff}
     <!-- ===NON-AMC=== -->
     <div id="tab-nonAmc" class="tab">
       <div class="ph"><h2>⚠️ Non-AMC Customer Follow-up</h2><p>All out-of-contract calls — send follow-up alerts to team lead</p></div>
+      <div style="display:flex;margin-bottom:14px"><button class="btn-secondary" onclick="syncTabData('renderNonAmc', this)" title="Pull the latest call data" style="padding:8px 12px;margin-left:auto">🔄 Sync Data</button></div>
       <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
         <div class="kpi k-orange"><div class="kpi-label">Non-AMC Calls</div><div class="kpi-value" id="na-total">0</div><div class="kpi-sub">Total logged</div><div class="kpi-icon">⚠️</div></div>
         <div class="kpi k-red"><div class="kpi-label">Open Non-AMC</div><div class="kpi-value" id="na-open">0</div><div class="kpi-sub">Unresolved</div><div class="kpi-icon">🔴</div></div>
@@ -1265,6 +1273,7 @@ tr:hover td{background:#f8f9ff}
     <!-- ===REPEATED ISSUES=== -->
     <div id="tab-repeatedIssues" class="tab">
       <div class="ph"><h2>🔁 Repeated Issues Tracker</h2><p>Auto-detected recurring problems — patterns needing permanent fix</p></div>
+      <div style="display:flex;margin-bottom:14px"><button class="btn-secondary" onclick="syncTabData('renderRepeatedIssues', this)" title="Pull the latest call data" style="padding:8px 12px;margin-left:auto">🔄 Sync Data</button></div>
       <div id="repIssueList"></div>
     </div>
 
@@ -1587,6 +1596,7 @@ tr:hover td{background:#f8f9ff}
           <input type="date" id="fbf-to" onchange="renderFeedbackDashboard()" title="To date">
           <input type="text" id="fbf-search" placeholder="🔎 Search comments, names, themes…" oninput="renderFeedbackDashboard()">
           <button class="btn-secondary" onclick="resetFeedbackFilters()" style="font-size:12px;padding:8px 14px">✕ Reset</button>
+          <button class="btn-secondary" onclick="syncTabData('renderFeedbackDashboard', this)" title="Pull the latest feedback data" style="font-size:12px;padding:8px 14px;margin-left:auto">🔄 Sync Data</button>
         </div>
 
         <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">
@@ -1652,6 +1662,7 @@ tr:hover td{background:#f8f9ff}
           <option value="week">This Week</option>
         </select>
         <span id="ppHint" style="font-size:11px;color:var(--muted)"></span>
+        <button class="btn-secondary" onclick="syncTabData('renderPerPerson', this)" title="Pull the latest call &amp; feedback data" style="padding:8px 12px;margin-left:auto">🔄 Sync Data</button>
       </div>
 
       <div class="card pp-hero" id="ppHero"></div>
@@ -1781,12 +1792,8 @@ tr:hover td{background:#f8f9ff}
         <option value="Customer Confirmation Pending">⏳ Customer Confirmation Pending</option>
       </select>
     </div>
-    <div class="fld" style="margin-bottom:14px"><label class="req">Updated By</label>
-      <select id="cc-by">
-        <option>Sri Harsha</option><option>Talha</option><option>Deshraj</option>
-        <option>Vivek</option><option>Ganesh</option><option>Ashutosh</option><option>Pawan</option>
-        <option>Niranjan</option>
-      </select>
+    <div class="fld" style="margin-bottom:14px"><label>Updated By</label>
+      <input id="cc-by" readonly>
     </div>
     <div class="fld" style="margin-bottom:16px"><label class="req">Update / Resolution Comment</label>
       <textarea id="cc-comment" placeholder="What was done? Steps taken, findings, resolution..." style="min-height:90px"></textarea>
@@ -2077,6 +2084,30 @@ function dbToProfile(row){
     shift:row.shift, photo:row.photo };
 }
 
+// Manual "Sync Data" button handler — forces a fresh pull from the shared
+// database and re-renders just the calling tab. Mainly useful if a realtime
+// update was missed (e.g. the tab was open during a brief connection blip).
+async function syncTabData(renderFnName, btnEl){
+  if(!supabaseReady){
+    showToast('Running in local-only mode — nothing to sync from.', 'error');
+    return;
+  }
+  if(btnEl){ btnEl.disabled = true; btnEl.dataset.origText = btnEl.innerHTML; btnEl.innerHTML = '⏳ Syncing…'; }
+  try{
+    await Promise.all([refreshCallsAndSops(), refreshSystem(), refreshFeedback()]);
+    callData = CLOUD.calls || [];
+    sops = CLOUD.sops || [];
+    refreshMembersFromUsers();
+    if(typeof window[renderFnName]==='function') window[renderFnName]();
+    showToast('Synced with shared data!', 'success');
+    AppLogger.info('Manual sync triggered', {tab: renderFnName});
+  }catch(e){
+    showToast('Sync failed: '+e.message, 'error');
+    AppLogger.error('Manual sync failed', {renderFn: renderFnName, message: e.message});
+  }finally{
+    if(btnEl){ btnEl.disabled = false; btnEl.innerHTML = btnEl.dataset.origText; }
+  }
+}
 async function refreshCallsAndSops(){
   const [callsRes, sopsRes] = await Promise.all([
     sb.from('calls').select('*').order('id', {ascending:false}),
@@ -2161,6 +2192,7 @@ function onCloudUpdate(){
   if(!currentUser) return;
   callData = CLOUD.calls || [];
   sops = CLOUD.sops || [];
+  refreshMembersFromUsers();
   const activeTab = document.querySelector('.tab.active');
   const activeKey = activeTab ? activeTab.id.replace('tab-','') : '';
   if(['dashboard','callLog','allCalls','openCalls','champion','performance','sops','nonAmc','repeatedIssues'].includes(activeKey)){
@@ -2214,6 +2246,7 @@ async function initCloudSync(){
     sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     await Promise.all([refreshCallsAndSops(), refreshSystem(), refreshFeedback()]);
     if(!CLOUD.rights || !Object.keys(CLOUD.rights).length) CLOUD.rights = defaultRights();
+    refreshMembersFromUsers();
     supabaseReady = true;
     AppLogger.success('Connected to Supabase backend');
     startRealtime();
@@ -2239,7 +2272,15 @@ let callData = [], profiles = {}, sops = [], currentUser = null;
 let pills = {}, selectedStatus = null, closingCallId = null;
 let charts = {};
 
-const MEMBERS = ['Sri Harsha','Talha','Deshraj','Vivek','Ganesh','Ashutosh','Pawan','Niranjan'];
+// MEMBERS starts as a fallback roster (used only before any real accounts exist /
+// while running in local-only mode), then gets replaced by the real list of
+// registered users the moment accounts are loaded — see refreshMembersFromUsers().
+let MEMBERS = ['Sri Harsha','Talha','Deshraj','Vivek','Ganesh','Ashutosh','Pawan','Niranjan'];
+function refreshMembersFromUsers(){
+  const users = CLOUD.users || {};
+  const names = [...new Set(Object.values(users).map(u=>u.name).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  if(names.length) MEMBERS = names;
+}
 const COLORS = ['#E8003D','#00c9c8','#f5a623','#2ecc71','#9b59b6','#3498db','#e67e22','#DB2777'];
 
 // =============================================
@@ -2289,6 +2330,7 @@ function loadUsers(){
 }
 function saveUsers(users){
   CLOUD.users = users;
+  refreshMembersFromUsers();
   if(!supabaseReady) return;
   const rows = Object.keys(users).map(uname=>userToDb(users[uname]));
   if(!rows.length) return;
@@ -3230,6 +3272,73 @@ function badge2(p){
   const m={Critical:'bg-red',High:'bg-orange',Medium:'bg-blue',Low:'bg-green'};
   return `<span class="badge ${m[p]||'bg-gray'}">${p}</span>`;
 }
+// =============================================
+// MEMBER TYPEAHEAD — searches the real registered-user roster (MEMBERS) live
+// as you type, no native <select>/<datalist> popup involved.
+// =============================================
+const TYPEAHEAD_REGISTRY = {};
+function initTypeahead(inputId, onChange, multi){
+  const input = document.getElementById(inputId);
+  if(!input) return;
+  let wrap = input.parentElement;
+  if(!wrap.classList.contains('ta-wrap')){
+    wrap = document.createElement('div');
+    wrap.className = 'ta-wrap';
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+  }
+  let resultsEl = document.getElementById(inputId+'-results');
+  if(!resultsEl){
+    resultsEl = document.createElement('div');
+    resultsEl.className = 'ta-results';
+    resultsEl.id = inputId+'-results';
+    wrap.appendChild(resultsEl);
+  }
+  TYPEAHEAD_REGISTRY[inputId] = {onChange: onChange||null, multi: !!multi};
+  input.removeAttribute('list');
+  input.setAttribute('autocomplete','off');
+  input.addEventListener('input', ()=>renderTypeaheadResults(inputId));
+  input.addEventListener('focus', ()=>renderTypeaheadResults(inputId));
+  input.addEventListener('blur', ()=>setTimeout(()=>{ resultsEl.style.display='none'; }, 150));
+}
+function taCurrentFragment(inputId){
+  const reg = TYPEAHEAD_REGISTRY[inputId];
+  const val = document.getElementById(inputId).value;
+  if(reg && reg.multi){ const parts = val.split(','); return parts[parts.length-1].trim(); }
+  return val.trim();
+}
+function taEscape(s){ const d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
+function renderTypeaheadResults(inputId){
+  const input = document.getElementById(inputId);
+  const resultsEl = document.getElementById(inputId+'-results');
+  const reg = TYPEAHEAD_REGISTRY[inputId];
+  if(!input || !resultsEl) return;
+  if(reg && reg.onChange) reg.onChange();
+  const q = taCurrentFragment(inputId).toLowerCase();
+  if(!q){ resultsEl.style.display='none'; resultsEl.innerHTML=''; return; }
+  const matches = MEMBERS.filter(m=>m.toLowerCase().includes(q)).slice(0,8);
+  resultsEl.innerHTML = matches.length
+    ? matches.map(m=>`<div class="ta-item" data-val="${taEscape(m)}">${taEscape(m)}</div>`).join('')
+    : '<div class="ta-empty">No matching team member</div>';
+  resultsEl.style.display = 'block';
+  resultsEl.querySelectorAll('.ta-item').forEach(el=>{
+    el.addEventListener('mousedown', (e)=>{
+      e.preventDefault();
+      const val = el.getAttribute('data-val');
+      if(reg && reg.multi){
+        const parts = input.value.split(',').map(p=>p.trim()).filter(Boolean);
+        parts.pop();
+        parts.push(val);
+        input.value = parts.join(', ') + ', ';
+      } else {
+        input.value = val;
+      }
+      resultsEl.style.display = 'none';
+      if(reg && reg.onChange) reg.onChange();
+      input.focus();
+    });
+  });
+}
 function filterData(){
   const s=(document.getElementById('fSearch')||{}).value?.toLowerCase()||'';
   const st=(document.getElementById('fStatus')||{}).value||'';
@@ -3287,14 +3396,15 @@ function showDetailModal(id){
     </div>`).join('');
   document.getElementById('detailContent').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;margin-bottom:16px">
-      ${dItem('Customer',c.customer)} ${dItem('Region',c.region)}
-      ${dItem('Location',c.location)} ${dItem('AMC',c.amc)}
-      ${dItem('Contact',c.contactName+' — '+c.contactInfo)} ${dItem('Status',c.status)}
-      ${dItem('Platform',c.platform)} ${dItem('System',c.systemType)}
-      ${dItem('Root Cause',c.rootCause)} ${dItem('Time Spent',c.hours+' min')}
-      ${dItem('Primary Resource',c.resource)} ${dItem('Support Resource',c.supportResource||'—')}
-      ${dItem('First Response',c.responseTime?c.responseTime+' mins':'—')} ${dItem('Priority',c.priority||'Medium')}
-      ${dItem('Reported',c.reportDate+' '+c.reportTime)} ${dItem('Resolved',c.resolveDate||'Pending')}
+      ${dItemPerson('Logged By',c.loggedBy)} ${dItem('Customer',c.customer)}
+      ${dItem('Region',c.region)} ${dItem('Location',c.location)}
+      ${dItem('AMC',c.amc)} ${dItem('Contact',c.contactName+' — '+c.contactInfo)}
+      ${dItem('Status',c.status)} ${dItem('Platform',c.platform)}
+      ${dItem('System',c.systemType)} ${dItem('Root Cause',c.rootCause)}
+      ${dItem('Time Spent',c.hours+' min')} ${dItemPerson('Primary Resource',c.resource)}
+      ${dItemPerson('Support Resource',c.supportResource||'—')} ${dItem('First Response',c.responseTime?c.responseTime+' mins':'—')}
+      ${dItem('Priority',c.priority||'Medium')} ${dItem('Reported',c.reportDate+' '+c.reportTime)}
+      ${dItem('Resolved',c.resolveDate||'Pending')}
       <div style="grid-column:1/-1">${dItem('Issue',c.issue)}</div>
       <div style="grid-column:1/-1">${dItem('Analysis',c.analysis)}</div>
       <div style="grid-column:1/-1">${dItem('Resolution',c.resolution)}</div>
@@ -3311,16 +3421,33 @@ function dItem(label,value){
     <div style="font-size:12px;font-weight:600">${value||'—'}</div>
   </div>`;
 }
+// Same as dItem, but the value is a person's name — clicking it jumps to their Per Person page
+function dItemPerson(label,name){
+  if(!name || name==='—') return dItem(label,name);
+  const safe = String(name).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  return `<div style="background:#f8f9fa;padding:10px;border-radius:8px;cursor:pointer" onclick="goToPerson('${safe}')" title="Open ${escapeVasuki(name)}'s Per Person page">
+    <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:3px">${label}</div>
+    <div style="font-size:12px;font-weight:600;color:var(--red)">${escapeVasuki(name)} 🔗</div>
+  </div>`;
+}
+function goToPerson(name){
+  document.getElementById('detailModal').classList.remove('open');
+  showTab('perPerson');
+  populatePerPersonSelect();
+  const sel = document.getElementById('ppMember');
+  if(sel && MEMBERS.includes(name)) sel.value = name;
+  renderPerPerson();
+}
 
 // =============================================
 // OPEN CALLS TAB
 // =============================================
 function renderOpenCalls(){
   const filt=document.getElementById('ocFilter')?.value||'all';
-  const mem=document.getElementById('ocMember')?.value||'';
+  const mem=(document.getElementById('ocMember')?.value||'').toLowerCase().trim();
   let data=getOpenCalls();
   if(filt!=='all') data=data.filter(c=>c.status===filt);
-  if(mem) data=data.filter(c=>c.resource===mem||(c.supportResource||'').includes(mem));
+  if(mem) data=data.filter(c=>(c.resource||'').toLowerCase().includes(mem)||(c.supportResource||'').toLowerCase().includes(mem));
   const oc=getOpenCalls();
   document.getElementById('oc-open').textContent=oc.filter(c=>c.status==='Open').length;
   document.getElementById('oc-inp').textContent=oc.filter(c=>c.status==='InProcess').length;
@@ -3639,7 +3766,7 @@ function renderRepeatedIssues(){
         <span class="badge bg-dark">${sys}</span>
         <span class="badge bg-orange">${rc}</span>
       </div>
-      <div style="font-size:11px;color:var(--muted)">${arr.slice(0,3).map(c=>`<div style="margin-bottom:3px">• <strong>${c.customer}</strong> — ${c.issue.slice(0,70)}...</div>`).join('')}</div>
+      <div style="font-size:11px;color:var(--muted)">${arr.slice(0,3).map(c=>`<div style="margin-bottom:5px;cursor:pointer" onclick="showDetailModal(${c.id})" title="View call detail">• <strong>${c.customer}</strong> — ${c.issue.slice(0,60)}... <span style="color:var(--red);font-weight:600">(${c.resource})</span></div>`).join('')}</div>
     </div>`;
   }).join('');
 }
@@ -4556,6 +4683,10 @@ function sendSnakeTo(targetEl, label, onArrive){
   };
 }
 
+// Wire up all member search fields — type-to-search, no native dropdown
+initTypeahead('fMember', renderTable, false);
+initTypeahead('ocMember', renderOpenCalls, false);
+initTypeahead('f-support', null, true);
 </script>
 </body>
 </html>
