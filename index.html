@@ -79,6 +79,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .role-table select{padding:6px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px}
 .role-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:800;text-transform:uppercase;background:linear-gradient(135deg,var(--gold),#f39c12);color:#fff}
 .role-empty{text-align:center;padding:40px;color:var(--muted)}
+.pp-hero{display:flex;align-items:center;gap:18px;padding:18px 22px;margin-bottom:16px}
+.pp-avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;flex-shrink:0}
+.pp-hero h3{font-size:20px;font-weight:800;margin-bottom:3px}
+.pp-hero .pp-meta{font-size:12px;color:var(--muted);line-height:1.6}
+.pp-badge{display:inline-block;padding:3px 11px;border-radius:100px;font-size:10px;font-weight:800;background:var(--red-light);color:var(--red2);margin-right:6px}
+.pp-two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.pp-two{grid-template-columns:1fr}.pp-hero{flex-direction:column;text-align:center}}
+.pp-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
+.pp-list li{font-size:12.5px;line-height:1.6;padding:9px 12px 9px 34px;border-radius:9px;position:relative;background:#fafbfe;border:1px solid var(--border)}
+.pp-list li::before{position:absolute;left:11px;top:9px;font-size:14px}
+.pp-list.good li::before{content:"✅"}
+.pp-list.warn li::before{content:"🎯"}
+.pp-list.idea li::before{content:"💡"}
+.pp-list li.empty-li{color:var(--muted);background:transparent;border-style:dashed}
+.pp-list li.empty-li::before{content:"ℹ️"}
+.pp-sub{font-size:12px;font-weight:800;color:var(--dark);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px}
+
 .fb-filter-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px;padding:14px 16px;background:#fff;border:1px solid var(--border);border-radius:12px}
 .fb-filter-bar select,.fb-filter-bar input[type=date]{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit}
 .fb-filter-bar input[type=text]{flex:1;min-width:160px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit}
@@ -585,6 +602,82 @@ tr:hover td{background:#f8f9ff}
 .log-msg{font-weight:600}
 .log-data{color:var(--muted);font-family:monospace;font-size:10px;max-width:320px;word-break:break-word}
 .log-empty{text-align:center;padding:40px;color:var(--muted)}
+/* =============================================
+   VASUKI — the portal's creative guide-bot
+============================================= */
+#vasukiLauncher{position:fixed;right:26px;bottom:26px;width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--dark),#0f3460);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 26px rgba(0,0,0,.35);z-index:5000;transition:transform .2s;border:2px solid rgba(255,255,255,.15)}
+#vasukiLauncher:hover{transform:scale(1.08)}
+#vasukiLauncher .coil-icon{font-size:30px;animation:coilBreathe 2.8s ease-in-out infinite}
+@keyframes coilBreathe{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.08) rotate(-4deg)}}
+#vasukiLauncher .ping-dot{position:absolute;top:6px;right:6px;width:10px;height:10px;border-radius:50%;background:var(--gold);animation:pingDot 2s infinite}
+@keyframes pingDot{0%{box-shadow:0 0 0 0 rgba(245,166,35,.6)}70%{box-shadow:0 0 0 10px rgba(245,166,35,0)}100%{box-shadow:0 0 0 0 rgba(245,166,35,0)}}
+#vasukiPanel{position:fixed;right:26px;bottom:104px;width:380px;max-height:min(560px,72vh);background:#fff;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.35);display:none;flex-direction:column;overflow:hidden;z-index:5000;border:1px solid var(--border)}
+#vasukiPanel.open{display:flex;animation:panelPop .25s cubic-bezier(.34,1.56,.64,1)}
+@keyframes panelPop{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:460px){#vasukiPanel{right:10px;left:10px;width:auto;bottom:90px}#vasukiLauncher{right:16px;bottom:16px}}
+.vasuki-hd{background:linear-gradient(135deg,var(--dark),#0f3460);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.vasuki-hd .avatar{font-size:26px}
+.vasuki-hd .titles{flex:1}
+.vasuki-hd .titles .name{font-weight:800;font-size:14px}
+.vasuki-hd .titles .status{font-size:10px;opacity:.75;display:flex;align-items:center;gap:4px}
+.vasuki-hd .status .dot{width:6px;height:6px;border-radius:50%;background:#2ecc71;display:inline-block}
+.vasuki-hd .close-btn{cursor:pointer;opacity:.8;font-size:18px}
+.vasuki-hd .close-btn:hover{opacity:1}
+.vasuki-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;background:#f7f8fc}
+.vmsg{max-width:86%;padding:10px 13px;border-radius:14px;font-size:12.5px;line-height:1.55}
+.vmsg.bot{background:#fff;border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+.vmsg.user{background:var(--red);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.vmsg .vcreature{font-size:20px;margin-right:6px;display:inline-block;animation:creatureBob 1.6s ease-in-out infinite}
+@keyframes creatureBob{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-3px) rotate(-6deg)}}
+.vmsg .kb-card{margin-top:8px;padding:10px 12px;background:#fafbfe;border:1px solid var(--border);border-radius:10px}
+.vmsg .kb-card .kb-title{font-weight:800;font-size:12px;color:var(--dark);margin-bottom:4px}
+.vmsg .kb-card .kb-meta{font-size:10px;color:var(--muted);margin-bottom:6px}
+.vmsg .kb-card .kb-body{font-size:11.5px;color:var(--text);margin-bottom:8px;line-height:1.5}
+.vmsg .kb-card button{font-size:11px;padding:6px 12px}
+.vmsg .nav-cta{margin-top:8px;font-size:11px;font-weight:700;padding:7px 13px;border-radius:100px;background:var(--red);color:#fff;border:none;cursor:pointer}
+.vmsg .nav-cta:hover{background:var(--red2)}
+.vasuki-typing{display:flex;gap:4px;padding:6px 4px}
+.vasuki-typing span{width:6px;height:6px;background:var(--muted);border-radius:50%;animation:typingBounce 1.2s infinite}
+.vasuki-typing span:nth-child(2){animation-delay:.15s}
+.vasuki-typing span:nth-child(3){animation-delay:.3s}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+.vasuki-input-bar{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);background:#fff;flex-shrink:0}
+.vasuki-input-bar input{flex:1;border:1.5px solid var(--border);border-radius:100px;padding:9px 15px;font-size:12.5px;font-family:inherit;outline:none}
+.vasuki-input-bar input:focus{border-color:var(--red)}
+.vasuki-input-bar button{width:38px;height:38px;border-radius:50%;background:var(--red);color:#fff;border:none;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vasuki-input-bar button:hover{background:var(--red2)}
+.vasuki-suggest{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 12px;flex-shrink:0}
+.vasuki-suggest span{font-size:10.5px;padding:5px 11px;border-radius:100px;background:#fff;border:1px solid var(--border);color:var(--muted);cursor:pointer}
+.vasuki-suggest span:hover{border-color:var(--red);color:var(--red)}
+
+/* ---- The Snake Guide (slithers to a module, then coils like a king cobra) ---- */
+#snakeGuide{position:fixed;left:0;top:0;z-index:6000;pointer-events:none;display:none}
+#snakeGuide.active{display:block}
+.snake-body{position:relative;width:1px;height:1px}
+.snake-seg{position:absolute;border-radius:50%;background:linear-gradient(135deg,#34d399,#16a34a);box-shadow:0 2px 6px rgba(0,0,0,.25);animation:slitherWiggle .55s ease-in-out infinite alternate}
+@keyframes slitherWiggle{from{transform:translateY(-4px)}to{transform:translateY(4px)}}
+.snake-seg.s0{width:22px;height:22px;left:-11px;top:-11px;animation-delay:0s;z-index:9}
+.snake-seg.s1{width:19px;height:19px;left:-27px;top:-9px;animation-delay:.08s;z-index:8}
+.snake-seg.s2{width:16px;height:16px;left:-41px;top:-8px;animation-delay:.16s;z-index:7}
+.snake-seg.s3{width:14px;height:14px;left:-54px;top:-7px;animation-delay:.24s;z-index:6}
+.snake-seg.s4{width:11px;height:11px;left:-65px;top:-5px;animation-delay:.32s;z-index:5}
+.snake-seg.s5{width:8px;height:8px;left:-74px;top:-4px;animation-delay:.4s;z-index:4}
+.snake-head{position:absolute;left:-11px;top:-11px;width:22px;height:22px;z-index:10}
+.snake-head .eye{position:absolute;width:3px;height:3px;background:#fff;border-radius:50%;top:6px}
+.snake-head .eye.l{left:4px}.snake-head .eye.r{right:4px}
+.snake-head .tongue{position:absolute;left:9px;top:19px;width:1.5px;height:7px;background:#e8003d;border-radius:2px;transform-origin:top;animation:tongueFlick .5s ease-in-out infinite}
+@keyframes tongueFlick{0%,100%{transform:scaleY(0);opacity:0}50%{transform:scaleY(1);opacity:1}}
+.cobra-coil{position:fixed;z-index:6001;display:none;flex-direction:column;align-items:center;pointer-events:auto;cursor:pointer}
+.cobra-coil.show{display:flex;animation:coilAppear .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes coilAppear{from{opacity:0;transform:scale(.5) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.cobra-hood{width:34px;height:30px;background:radial-gradient(circle at 50% 30%, #34d399, #16a34a 70%, #0f7a3d);border-radius:50% 50% 46% 46% / 60% 60% 40% 40%;position:relative;box-shadow:0 4px 14px rgba(22,163,74,.5);animation:cobraSway 2.2s ease-in-out infinite}
+@keyframes cobraSway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+.cobra-hood::before,.cobra-hood::after{content:'';position:absolute;width:4px;height:4px;background:#fff;border-radius:50%;top:11px}
+.cobra-hood::before{left:9px}.cobra-hood::after{right:9px}
+.cobra-body-ring{width:40px;height:14px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#0f7a3d);margin-top:-4px;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+.cobra-label{margin-top:6px;background:var(--dark);color:#fff;font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:100px;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+.nav-guided-pulse{animation:navPulse 1s ease-in-out 4}
+@keyframes navPulse{0%,100%{background:rgba(46,204,113,0)}50%{background:rgba(46,204,113,.25)}}
 </style>
 </head>
 <body>
@@ -743,6 +836,9 @@ tr:hover td{background:#f8f9ff}
     <div class="nav-item active" data-tab="dashboard" onclick="showTab('dashboard',this)">
       <span class="ni">📊</span> Dashboard
     </div>
+    <div class="nav-item" data-tab="perPerson" onclick="showTab('perPerson',this)">
+      <span class="ni">🧑‍💼</span> Per Person
+    </div>
 
     <div class="nav-section">Call Management</div>
     <div class="nav-item" data-tab="callLog" onclick="showTab('callLog',this)">
@@ -813,15 +909,23 @@ tr:hover td{background:#f8f9ff}
         <p><span class="live-dot"></span> Auto-refreshing · All metrics update on every new log</p>
       </div>
 
+      <div class="fi-date-wrap" style="display:flex;align-items:center;gap:4px;margin-bottom:16px">
+        <input type="date" id="dashFrom" onchange="renderDashboard()" title="From date">
+        <span style="font-size:11px;color:var(--muted)">to</span>
+        <input type="date" id="dashTo" onchange="renderDashboard()" title="To date">
+        <button class="btn-secondary" onclick="document.getElementById('dashFrom').value='';document.getElementById('dashTo').value='';renderDashboard()" title="Clear date filter" style="padding:8px 10px">✕</button>
+        <span style="font-size:11px;color:var(--muted)">Leave blank to show all-time. "Today / This Week / This Month" cards below always reflect their own period, filtered further by any range set here.</span>
+      </div>
+
       <div class="kpi-grid">
-        <div class="kpi k-red"><div class="kpi-label">Total Calls</div><div class="kpi-value" id="k-total">0</div><div class="kpi-sub">All time</div><div class="kpi-icon">📞</div></div>
+        <div class="kpi k-red"><div class="kpi-label">Total Calls</div><div class="kpi-value" id="k-total">0</div><div class="kpi-sub" id="k-total-sub">All time</div><div class="kpi-icon">📞</div></div>
         <div class="kpi k-teal"><div class="kpi-label">Today's Calls</div><div class="kpi-value" id="k-today">0</div><div class="kpi-sub" id="k-today-dt">—</div><div class="kpi-icon">📅</div></div>
         <div class="kpi k-green"><div class="kpi-label">Resolution Rate</div><div class="kpi-value" id="k-rate">0%</div><div class="kpi-sub" id="k-closed">0 closed</div><div class="kpi-icon">✅</div></div>
         <div class="kpi k-orange"><div class="kpi-label">Open / Pending</div><div class="kpi-value" id="k-open">0</div><div class="kpi-sub">Needs attention</div><div class="kpi-icon">🔴</div></div>
         <div class="kpi k-purple"><div class="kpi-label">Non-AMC Calls</div><div class="kpi-value" id="k-nonamc">0</div><div class="kpi-sub">Out-of-contract</div><div class="kpi-icon">⚠️</div></div>
         <div class="kpi k-blue"><div class="kpi-label">This Week</div><div class="kpi-value" id="k-week">0</div><div class="kpi-sub">Mon–Sun</div><div class="kpi-icon">📆</div></div>
         <div class="kpi k-gold"><div class="kpi-label">This Month</div><div class="kpi-value" id="k-month">0</div><div class="kpi-sub" id="k-month-nm">—</div><div class="kpi-icon">🗓</div></div>
-        <div class="kpi k-dark"><div class="kpi-label">Avg Handle Time</div><div class="kpi-value" id="k-avg">—</div><div class="kpi-sub">Hours per call</div><div class="kpi-icon">⏱</div></div>
+        <div class="kpi k-dark"><div class="kpi-label">Avg Handle Time</div><div class="kpi-value" id="k-avg">—</div><div class="kpi-sub">Minutes per call</div><div class="kpi-icon">⏱</div></div>
       </div>
 
       <div class="chart-grid">
@@ -894,10 +998,11 @@ tr:hover td{background:#f8f9ff}
             <datalist id="memberDl">
               <option>Sri Harsha</option><option>Talha</option><option>Deshraj</option>
               <option>Vivek</option><option>Ganesh</option><option>Ashutosh</option><option>Pawan</option>
+              <option>Niranjan</option>
             </datalist>
           </div>
           <div class="fld"><label class="req">First Response Time (mins)</label><input type="number" id="f-resp" placeholder="e.g. 15" min="0"></div>
-          <div class="fld"><label class="req">Hours Worked</label><input type="number" id="f-hrs" placeholder="e.g. 1.5" step="0.25" min="0"></div>
+          <div class="fld"><label class="req">Minutes Worked</label><input type="number" id="f-hrs" placeholder="e.g. 90" step="1" min="0"></div>
 
           <div class="fld-section">⚙️ Technical Classification</div>
 
@@ -1003,6 +1108,18 @@ tr:hover td{background:#f8f9ff}
           <button class="btn-primary" onclick="submitCall()">✅ Submit Call Log</button>
         </div>
       </div>
+
+      <!-- BULK IMPORT -->
+      <div class="card edit-only" data-module="callLog" style="margin-top:20px">
+        <div class="card-hd"><div class="card-title">📥 Import Previous Calls from Excel</div></div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Bring in call records logged elsewhere before this portal went live. Download the template, fill it in (one row per call), then import — each valid row is added as a new call.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn-secondary" onclick="downloadCallTemplate()">⬇ Download Excel Template</button>
+          <button class="btn-primary" onclick="document.getElementById('callImportFile').click()">📤 Import Excel File</button>
+          <input type="file" id="callImportFile" accept=".xlsx,.xls" style="display:none" onchange="handleCallImport(event)">
+        </div>
+        <div id="importResult" style="margin-top:14px;display:none"></div>
+      </div>
     </div>
 
     <!-- ===ALL CALLS=== -->
@@ -1015,14 +1132,15 @@ tr:hover td{background:#f8f9ff}
           <option>Closed</option><option>Open</option><option>InProcess</option>
           <option>Under Observation</option><option>Customer Confirmation Pending</option>
         </select>
-        <select id="fMember" onchange="renderTable()">
-          <option value="">All Members</option>
-          <option>Sri Harsha</option><option>Talha</option><option>Deshraj</option>
-          <option>Vivek</option><option>Ganesh</option><option>Ashutosh</option><option>Pawan</option>
-        </select>
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="text" id="fMember" list="memberDl" placeholder="🔎 Search member…" oninput="renderTable()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;min-width:150px">
+          <button class="btn-secondary" onclick="document.getElementById('fMember').value='';renderTable()" title="Clear member filter" style="padding:8px 10px">✕</button>
+        </div>
         <div class="fi-date-wrap" style="display:flex;align-items:center;gap:4px">
-          <input type="date" id="fDate" onchange="renderTable()" title="Filter by exact date">
-          <button class="btn-secondary" onclick="document.getElementById('fDate').value='';renderTable()" title="Clear date filter" style="padding:8px 10px">✕</button>
+          <input type="date" id="fDateFrom" onchange="renderTable()" title="From date">
+          <span style="font-size:11px;color:var(--muted)">to</span>
+          <input type="date" id="fDateTo" onchange="renderTable()" title="To date">
+          <button class="btn-secondary" onclick="document.getElementById('fDateFrom').value='';document.getElementById('fDateTo').value='';renderTable()" title="Clear date filter" style="padding:8px 10px">✕</button>
         </div>
         <select id="fShift" onchange="renderTable()">
           <option value="">All Shifts</option>
@@ -1036,7 +1154,7 @@ tr:hover td{background:#f8f9ff}
           <table><thead><tr>
             <th>#</th><th>Date</th><th>Customer</th><th>Region</th><th>Issue</th>
             <th>Platform</th><th>System</th><th>RCA</th><th>Primary</th><th>Support</th>
-            <th>Resp(m)</th><th>Hrs</th><th>Priority</th><th>Status</th><th>AMC</th><th>Shift</th>
+            <th>Resp(m)</th><th>Mins</th><th>Priority</th><th>Status</th><th>AMC</th><th>Shift</th>
           </tr></thead><tbody id="callTbody"></tbody></table>
         </div>
       </div>
@@ -1066,6 +1184,7 @@ tr:hover td{background:#f8f9ff}
           <option value="">All Members</option>
           <option>Sri Harsha</option><option>Talha</option><option>Deshraj</option>
           <option>Vivek</option><option>Ganesh</option><option>Ashutosh</option><option>Pawan</option>
+          <option>Niranjan</option>
         </select>
       </div>
 
@@ -1076,12 +1195,17 @@ tr:hover td{background:#f8f9ff}
     <div id="tab-champion" class="tab">
       <div class="ph"><h2>🏆 Champion Dashboard</h2><p>Celebrating excellence and recognising team effort</p></div>
 
-      <div style="display:flex;gap:10px;margin-bottom:16px">
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
         <select id="champPeriod" onchange="renderChampion()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px">
           <option value="week">This Week</option>
           <option value="month">This Month</option>
           <option value="all">All Time</option>
         </select>
+        <span style="font-size:11px;color:var(--muted)">or custom range:</span>
+        <input type="date" id="champFrom" onchange="renderChampion()" title="From date">
+        <span style="font-size:11px;color:var(--muted)">to</span>
+        <input type="date" id="champTo" onchange="renderChampion()" title="To date">
+        <button class="btn-secondary" onclick="document.getElementById('champFrom').value='';document.getElementById('champTo').value='';renderChampion()" title="Clear date range" style="padding:8px 10px">✕</button>
       </div>
 
       <div id="champPodium" style="text-align:center;margin-bottom:24px"></div>
@@ -1091,17 +1215,22 @@ tr:hover td{background:#f8f9ff}
     <!-- ===PERFORMANCE=== -->
     <div id="tab-performance" class="tab">
       <div class="ph"><h2>📈 Team Performance</h2><p>Member-wise KPIs and response metrics</p></div>
-      <div style="display:flex;gap:10px;margin-bottom:16px">
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
         <select id="perfPeriod" onchange="renderPerformance()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px">
           <option value="all">All Time</option>
           <option value="today">Today</option>
           <option value="week">This Week</option>
           <option value="month">This Month</option>
         </select>
+        <span style="font-size:11px;color:var(--muted)">or custom range:</span>
+        <input type="date" id="perfFrom" onchange="renderPerformance()" title="From date">
+        <span style="font-size:11px;color:var(--muted)">to</span>
+        <input type="date" id="perfTo" onchange="renderPerformance()" title="To date">
+        <button class="btn-secondary" onclick="document.getElementById('perfFrom').value='';document.getElementById('perfTo').value='';renderPerformance()" title="Clear date range" style="padding:8px 10px">✕</button>
       </div>
       <div class="member-grid" id="perfGrid"></div>
       <div class="chart-grid">
-        <div class="chart-box" style="grid-column:1/-1"><h3>⏱ Total Hours Worked per Member</h3><canvas id="cHours" style="max-height:200px"></canvas></div>
+        <div class="chart-box" style="grid-column:1/-1"><h3>⏱ Total Minutes Worked per Member</h3><canvas id="cHours" style="max-height:200px"></canvas></div>
       </div>
       <div class="chart-grid">
         <div class="chart-box"><h3>📞 Avg Response Time (mins) per Member</h3><canvas id="cResp"></canvas></div>
@@ -1511,6 +1640,53 @@ tr:hover td{background:#f8f9ff}
       </div>
     </div>
 
+    <!-- ===PER PERSON=== -->
+    <div id="tab-perPerson" class="tab">
+      <div class="ph"><h2>🧑‍💼 Per Person — Individual Review</h2><p>One page per team member: call activity, peer feedback, strengths, improvement points and growth ideas</p></div>
+      <div class="fb-filter-bar">
+        <select id="ppMember" onchange="renderPerPerson()" style="min-width:180px"></select>
+        <select id="ppPeriod" onchange="renderPerPerson()">
+          <option value="all">All Time</option>
+          <option value="month">This Month</option>
+          <option value="quarter">Last 90 Days</option>
+          <option value="week">This Week</option>
+        </select>
+        <span id="ppHint" style="font-size:11px;color:var(--muted)"></span>
+      </div>
+
+      <div class="card pp-hero" id="ppHero"></div>
+
+      <div class="kpi-grid" id="ppKpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px"></div>
+
+      <div class="chart-grid">
+        <div class="chart-box"><h3>📅 Calls Handled per Month</h3><canvas id="ppTrend"></canvas></div>
+        <div class="chart-box"><h3>🎯 Call Status Mix</h3><canvas id="ppStatus"></canvas></div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-box"><h3>🔧 Top Root Causes Handled</h3><canvas id="ppRca"></canvas></div>
+        <div class="chart-box"><h3>💬 Peer Feedback vs Team Average (out of 5)</h3><canvas id="ppFb"></canvas></div>
+      </div>
+
+      <div class="pp-two">
+        <div class="card"><div class="card-hd"><div class="card-title">✅ Strengths</div></div><ul class="pp-list good" id="ppStrengths"></ul></div>
+        <div class="card"><div class="card-hd"><div class="card-title">🎯 Improvement Points</div></div><ul class="pp-list warn" id="ppImprove"></ul></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-hd"><div class="card-title">📝 What Peers Wrote About This Person</div></div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">Pulled from Team Feedback comments that mention this person by name.</p>
+        <div class="fb-comments-feed" id="ppVoice"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-hd"><div class="card-title">🌱 Growth, Recognition &amp; Recreation Ideas</div></div>
+        <div class="pp-two" style="margin-top:6px">
+          <div><h4 class="pp-sub" id="ppTailoredTitle">Tailored ideas</h4><ul class="pp-list idea" id="ppTailored"></ul></div>
+          <div><h4 class="pp-sub">Always-good ideas for growing in the organisation</h4><ul class="pp-list idea" id="ppGeneral"></ul></div>
+        </div>
+      </div>
+    </div>
+
     <!-- ===SYSTEM LOGS=== -->
     <div id="tab-logs" class="tab">
       <div class="ph">
@@ -1609,6 +1785,7 @@ tr:hover td{background:#f8f9ff}
       <select id="cc-by">
         <option>Sri Harsha</option><option>Talha</option><option>Deshraj</option>
         <option>Vivek</option><option>Ganesh</option><option>Ashutosh</option><option>Pawan</option>
+        <option>Niranjan</option>
       </select>
     </div>
     <div class="fld" style="margin-bottom:16px"><label class="req">Update / Resolution Comment</label>
@@ -1691,6 +1868,54 @@ tr:hover td{background:#f8f9ff}
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- ===== VASUKI — the portal's creative guide-bot ===== -->
+<div id="vasukiLauncher" onclick="toggleVasuki()" title="Ask Vasuki" style="display:none">
+  <span class="coil-icon">🐍</span>
+  <span class="ping-dot" id="vasukiPing"></span>
+</div>
+<div id="vasukiPanel">
+  <div class="vasuki-hd">
+    <span class="avatar">🐍</span>
+    <div class="titles">
+      <div class="name">Vasuki — Portal Guide</div>
+      <div class="status"><span class="dot"></span> Learns from every call you log</div>
+    </div>
+    <span class="close-btn" onclick="toggleVasuki(false)">✕</span>
+  </div>
+  <div class="vasuki-msgs" id="vasukiMsgs"></div>
+  <div class="vasuki-suggest" id="vasukiSuggest">
+    <span onclick="vasukiAsk('Where do I see open calls?')">Where are open calls?</span>
+    <span onclick="vasukiAsk('How do I import calls from Excel?')">Import calls?</span>
+    <span onclick="vasukiAsk('Who can edit vs view?')">View vs Edit?</span>
+  </div>
+  <div class="vasuki-input-bar">
+    <input type="text" id="vasukiInput" placeholder="Ask about a module, or paste an issue…" onkeydown="if(event.key==='Enter') vasukiSend()">
+    <button onclick="vasukiSend()">➤</button>
+  </div>
+</div>
+
+<!-- The slithering snake (travels to a nav item) -->
+<div id="snakeGuide">
+  <div class="snake-body">
+    <div class="snake-seg s5"></div>
+    <div class="snake-seg s4"></div>
+    <div class="snake-seg s3"></div>
+    <div class="snake-seg s2"></div>
+    <div class="snake-seg s1"></div>
+    <div class="snake-seg s0"></div>
+    <div class="snake-head">
+      <div class="eye l"></div><div class="eye r"></div>
+      <div class="tongue"></div>
+    </div>
+  </div>
+</div>
+<!-- The coiled king cobra (sits at the destination) -->
+<div class="cobra-coil" id="cobraCoil">
+  <div class="cobra-hood"></div>
+  <div class="cobra-body-ring"></div>
+  <div class="cobra-label" id="cobraLabel">Here! 🐍</div>
+</div>
 
 <script>
 // =============================================
@@ -1783,7 +2008,8 @@ function isSupabaseConfigured(){
 // ---- field-name mapping: app uses camelCase, Postgres uses snake_case ----
 const MODULE_DB_COL = {dashboard:'dashboard', callLog:'call_log', allCalls:'all_calls', openCalls:'open_calls',
   champion:'champion', performance:'performance', sops:'sops', nonAmc:'non_amc',
-  repeatedIssues:'repeated_issues', pmFollowup:'pm_followup', feedback:'feedback'};
+  repeatedIssues:'repeated_issues', pmFollowup:'pm_followup', feedback:'feedback',
+  perPerson:'per_person'};
 
 function callToDb(r){
   return { id:r.id, logged_by:r.loggedBy, log_date:r.logDate, log_time:r.logTime, shift:r.shift,
@@ -1950,6 +2176,7 @@ function onCloudUpdate(){
   if(activeKey==='feedback' && document.getElementById('fbPanel-dashboard') && document.getElementById('fbPanel-dashboard').classList.contains('active')){
     renderFeedbackDashboard();
   }
+  if(activeKey==='perPerson') renderPerPerson();
 }
 let _realtimeDebounce = null;
 function handleRealtimeChange(payload){
@@ -2012,8 +2239,8 @@ let callData = [], profiles = {}, sops = [], currentUser = null;
 let pills = {}, selectedStatus = null, closingCallId = null;
 let charts = {};
 
-const MEMBERS = ['Sri Harsha','Talha','Deshraj','Vivek','Ganesh','Ashutosh','Pawan'];
-const COLORS = ['#E8003D','#00c9c8','#f5a623','#2ecc71','#9b59b6','#3498db','#e67e22'];
+const MEMBERS = ['Sri Harsha','Talha','Deshraj','Vivek','Ganesh','Ashutosh','Pawan','Niranjan'];
+const COLORS = ['#E8003D','#00c9c8','#f5a623','#2ecc71','#9b59b6','#3498db','#e67e22','#DB2777'];
 
 // =============================================
 // PARTICLES
@@ -2048,7 +2275,8 @@ const MODULE_LIST = [
   {key:'nonAmc', label:'⚠️ Non-AMC Follow-up'},
   {key:'repeatedIssues', label:'🔁 Repeated Issues'},
   {key:'pmFollowup', label:'🛠 PM Follow-up'},
-  {key:'feedback', label:'💬 Team Feedback'}
+  {key:'feedback', label:'💬 Team Feedback'},
+  {key:'perPerson', label:'🧑‍💼 Per Person'}
 ];
 function defaultRights(){
   const mk = (level)=>{ const o={}; MODULE_LIST.forEach(m=>o[m.key] = level); return o; };
@@ -2223,6 +2451,7 @@ function completeLogin(user, shift){
   AppLogger.success('User logged in', {name:user.name, username:user.username, designation:user.designation, role:currentUser.role, shift:shift, isAdmin: !!user.isAdmin});
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appShell').style.display='block';
+  document.getElementById('vasukiLauncher').style.display='flex';
   document.getElementById('topAvatar').textContent = user.name.charAt(0).toUpperCase();
   document.getElementById('topShiftPill').textContent = shift + ' Shift';
   document.getElementById('topShiftPill').className = 'shift-pill '+shift;
@@ -2289,6 +2518,8 @@ function doLogout(){
   currentUser=null;
   document.getElementById('appShell').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('vasukiLauncher').style.display='none';
+  document.getElementById('vasukiPanel').classList.remove('open');
   showAuth('landing');
 }
 
@@ -2481,6 +2712,7 @@ function showTab(tab, el){
   if(tab==='sops') renderSOPs();
   if(tab==='logs') renderLogs();
   if(tab==='rolesRights') showRolesSubtab('roles');
+  if(tab==='perPerson') renderPerPerson();
   if(tab==='feedback'){
     const nameEl=document.getElementById('tl-name');
     if(nameEl && !nameEl.value && currentUser) nameEl.value = currentUser.name;
@@ -2601,6 +2833,157 @@ function validateForm(){
   if(!selectedStatus){ flagMissingField('g-status','Root Cause & Status','Call Status'); return false; }
   return true;
 }
+
+// =============================================
+// BULK IMPORT — previous calls from Excel
+// =============================================
+const IMPORT_FIELD_HEADERS = [
+  ['Logged By','loggedBy'], ['Shift','shift'], ['Call Date (YYYY-MM-DD)','logDate'], ['Call Time (HH:MM)','logTime'],
+  ['Customer','customer'], ['Region','region'], ['Location','location'], ['Under AMC? (Yes/No)','amc'],
+  ['Contact Name','contactName'], ['Contact Info','contactInfo'], ['Issue Description','issue'],
+  ['JIRA / Ticket Ref','jira'], ['Primary Resource','resource'], ['Support Resource','supportResource'],
+  ['Reported Date (YYYY-MM-DD)','reportDate'], ['Reported Time (HH:MM)','reportTime'], ['Resolve Date (YYYY-MM-DD)','resolveDate'],
+  ['First Response (mins)','responseTime'], ['Issue Type (Software/Hardware)','issueType'], ['Platform','platform'],
+  ['System Type','systemType'], ['Version','version'], ['Serial Number','serial'],
+  ['Priority (Low/Medium/High/Critical)','priority'], ['Service Analysis','analysis'], ['Resolution','resolution'],
+  ['Remarks','remarks'], ['Root Cause','rootCause'], ['Minutes Spent','hours'],
+  ['Status (Open/InProcess/Under Observation/Customer Confirmation Pending/Closed)','status']
+];
+function normImportHeader(h){
+  return String(h||'').toLowerCase().replace(/\([^)]*\)/g,'').replace(/[^a-z0-9]/g,'').trim();
+}
+function downloadCallTemplate(){
+  if(!guardEdit('callLog','downloading the import template')) return;
+  const headers = IMPORT_FIELD_HEADERS.map(h=>h[0]);
+  const example = {
+    'Logged By':'Talha','Shift':'Morning','Call Date (YYYY-MM-DD)':'2026-01-15','Call Time (HH:MM)':'10:30',
+    'Customer':'Zydus Pharma','Region':'India - West','Location':'Ahmedabad','Under AMC? (Yes/No)':'Yes',
+    'Contact Name':'Rakesh Shah','Contact Info':'rakesh@zydus.com','Issue Description':'VFT unit not powering on',
+    'JIRA / Ticket Ref':'TTVS-10234','Primary Resource':'Talha','Support Resource':'Ganesh',
+    'Reported Date (YYYY-MM-DD)':'2026-01-15','Reported Time (HH:MM)':'10:15','Resolve Date (YYYY-MM-DD)':'2026-01-15',
+    'First Response (mins)':'12','Issue Type (Software/Hardware)':'Hardware','Platform':'VFT','System Type':'Model-X',
+    'Version':'10.46','Serial Number':'VFTH0517016','Priority (Low/Medium/High/Critical)':'High',
+    'Service Analysis':'Checked power supply and fuse','Resolution':'Replaced fuse and power cable',
+    'Remarks':'Handover: monitor for 24h','Root Cause':'Hardware Failure — Power Supply','Minutes Spent':'90',
+    'Status (Open/InProcess/Under Observation/Customer Confirmation Pending/Closed)':'Closed'
+  };
+  const ws1 = XLSX.utils.json_to_sheet([example], {header:headers});
+  ws1['!cols'] = headers.map(()=>({wch:26}));
+  const validValues = [
+    ['Field','Valid Values'],
+    ['Shift','Morning, General, Evening, Night'],
+    ['Under AMC?','Yes, No'],
+    ['Issue Type','Software, Hardware'],
+    ['Priority','Low, Medium, High, Critical'],
+    ['Status','Open, InProcess, Under Observation, Customer Confirmation Pending, Closed'],
+    ['Dates','YYYY-MM-DD, e.g. 2026-01-15'],
+    ['Times','24-hour HH:MM, e.g. 14:30'],
+    ['Required fields','Customer, Issue Description, Primary Resource and Status must be filled — rows missing any of these are skipped on import.']
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(validValues);
+  ws2['!cols'] = [{wch:16},{wch:70}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws1, 'Import Template');
+  XLSX.utils.book_append_sheet(wb, ws2, 'Valid Values');
+  XLSX.writeFile(wb, 'ACGI_Call_Import_Template.xlsx');
+  AppLogger.info('Downloaded call import template');
+}
+async function handleCallImport(e){
+  const file = e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  if(!guardEdit('callLog','importing calls')) return;
+
+  const resultEl = document.getElementById('importResult');
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = '<p style="font-size:12px;color:var(--muted)">Reading file…</p>';
+
+  try{
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, {type:'array'});
+    const sheetName = wb.SheetNames.find(n=>n.toLowerCase().includes('import')) || wb.SheetNames[0];
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {defval:''});
+
+    if(!rows.length){
+      resultEl.innerHTML = '<p style="font-size:12px;color:var(--red)">The file has no data rows.</p>';
+      return;
+    }
+
+    const headerKeys = Object.keys(rows[0]);
+    const fieldMap = {};
+    headerKeys.forEach(hk=>{
+      const norm = normImportHeader(hk);
+      const match = IMPORT_FIELD_HEADERS.find(([label])=>normImportHeader(label)===norm);
+      if(match) fieldMap[hk] = match[1];
+    });
+
+    const VALID_STATUS = ['Open','InProcess','Under Observation','Customer Confirmation Pending','Closed'];
+    const VALID_PRIORITY = ['Low','Medium','High','Critical'];
+    const VALID_SHIFT = ['Morning','General','Evening','Night'];
+    const VALID_ITYPE = ['Software','Hardware'];
+
+    const imported = [], errors = [];
+    const baseId = Date.now();
+
+    rows.forEach((row, idx)=>{
+      const rec = {};
+      Object.keys(row).forEach(hk=>{ if(fieldMap[hk]) rec[fieldMap[hk]] = String(row[hk]??'').trim(); });
+      const rowNum = idx+2;
+
+      if(!rec.customer || !rec.issue || !rec.resource || !rec.status){
+        errors.push(`Row ${rowNum}: missing Customer, Issue Description, Primary Resource or Status — skipped.`);
+        return;
+      }
+      if(!VALID_STATUS.includes(rec.status)){
+        errors.push(`Row ${rowNum}: Status "${rec.status}" isn't valid — skipped.`);
+        return;
+      }
+      rec.priority = VALID_PRIORITY.includes(rec.priority) ? rec.priority : 'Medium';
+      rec.shift = VALID_SHIFT.includes(rec.shift) ? rec.shift : 'General';
+      rec.issueType = VALID_ITYPE.includes(rec.issueType) ? rec.issueType : 'Software';
+      rec.amc = rec.amc==='Yes' ? 'Yes' : 'No';
+      rec.hours = parseFloat(rec.hours)||0; // "Minutes Spent" column, stored as minutes
+      rec.responseTime = parseFloat(rec.responseTime)||0;
+      rec.logDate = rec.logDate || new Date().toISOString().slice(0,10);
+      rec.reportDate = rec.reportDate || rec.logDate;
+      rec.logTime = rec.logTime || '00:00';
+      rec.reportTime = rec.reportTime || rec.logTime;
+      rec.loggedBy = rec.loggedBy || currentUser.name;
+      rec.id = baseId + idx;
+      rec.timeline = [{by: rec.loggedBy, time: new Date().toISOString(), action:'Call Logged', comment:'Imported from Excel — initial status: '+rec.status}];
+
+      imported.push(rec);
+    });
+
+    if(!imported.length){
+      resultEl.innerHTML = '<p style="font-size:12px;color:var(--red)">No rows could be imported.</p>' +
+        (errors.length ? '<ul style="font-size:11px;color:var(--muted);margin-top:6px">'+errors.slice(0,20).map(er=>'<li>'+er+'</li>').join('')+'</ul>' : '');
+      return;
+    }
+
+    callData = [...imported, ...callData];
+    CLOUD.calls = callData;
+    let pushError = null;
+    if(supabaseReady){
+      const {error} = await sb.from('calls').insert(imported.map(callToDb));
+      if(error) pushError = error.message;
+    }
+    rebuildDatalist();
+    renderAll();
+    checkOpenCallsAlert();
+
+    resultEl.innerHTML = `<p style="font-size:12px;font-weight:700;color:var(--green)">✅ Imported ${imported.length} call${imported.length>1?'s':''}${errors.length?(' — '+errors.length+' row'+(errors.length>1?'s':'')+' skipped'):''}.</p>` +
+      (pushError ? `<p style="font-size:11px;color:var(--red)">⚠️ Saved locally but the shared database rejected it: ${pushError}</p>` : '') +
+      (errors.length ? '<details style="margin-top:6px"><summary style="font-size:11px;cursor:pointer;color:var(--muted)">View skipped rows</summary><ul style="font-size:11px;color:var(--muted);margin-top:4px">'+errors.slice(0,30).map(er=>'<li>'+er+'</li>').join('')+'</ul></details>' : '');
+
+    AppLogger.success('Bulk-imported calls from Excel', {count:imported.length, skipped:errors.length});
+    showToast(imported.length+' call(s) imported!','success');
+  }catch(err){
+    resultEl.innerHTML = `<p style="font-size:12px;color:var(--red)">Could not read this file: ${err.message}</p>`;
+    AppLogger.error('Call import failed', {message: err.message});
+  }
+}
+
 function submitCall(){
   if(!guardEdit('callLog','logging a call')) return;
   if(!validateForm()) return;
@@ -2746,10 +3129,11 @@ function rebuildDatalist(){
 // DASHBOARD
 // =============================================
 function countBy(data,field){const m={};data.forEach(d=>{const v=d[field]||'Unknown';m[v]=(m[v]||0)+1});return m;}
-function mkChart(id,type,obj,colors,onClickLabel){
+function mkChart(id,type,obj,colors,onClickLabel,axisLabels){
   const ctx=document.getElementById(id); if(!ctx) return;
   if(charts[id]){charts[id].destroy();}
   const labels=Object.keys(obj);
+  const ax = axisLabels||{};
   charts[id]=new Chart(ctx.getContext('2d'),{
     type,data:{labels,datasets:[{data:Object.values(obj),
       backgroundColor:colors||labels.map((_,i)=>`hsl(${i*37},65%,50%)`),
@@ -2757,43 +3141,71 @@ function mkChart(id,type,obj,colors,onClickLabel){
     options:{responsive:true,
       onClick: onClickLabel ? (evt,els)=>{ if(els&&els.length) onClickLabel(labels[els[0].index]); } : undefined,
       plugins:{legend:{position:type==='doughnut'?'right':'top',labels:{font:{size:10},boxWidth:11}}},
-      scales:type==='bar'?{y:{beginAtZero:true,ticks:{font:{size:9}},grid:{color:'#f5f5f5'}},x:{ticks:{font:{size:9}},grid:{display:false}}}:{}}
+      scales:type==='bar'?{
+        y:{beginAtZero:true,ticks:{font:{size:9}},grid:{color:'#f5f5f5'},
+           title:{display:!!ax.y,text:ax.y||'',font:{size:10,weight:'600'},color:'#556'}},
+        x:{ticks:{font:{size:9}},grid:{display:false},
+           title:{display:!!ax.x,text:ax.x||'',font:{size:10,weight:'600'},color:'#556'}}
+      }:{}}
+  });
+}
+function getDashboardFilteredData(){
+  const from=(document.getElementById('dashFrom')||{}).value||'';
+  const to=(document.getElementById('dashTo')||{}).value||'';
+  if(!from && !to) return callData;
+  return callData.filter(c=>{
+    const d=c.reportDate||c.logDate;
+    if(from&&d<from) return false;
+    if(to&&d>to) return false;
+    return true;
   });
 }
 function renderDashboard(){
   if(!callData.length){return;}
+  const data=getDashboardFilteredData();
+  const from=(document.getElementById('dashFrom')||{}).value||'';
+  const to=(document.getElementById('dashTo')||{}).value||'';
+  document.getElementById('k-total-sub').textContent = (from||to) ? `${from||'…'} to ${to||'…'}` : 'All time';
+  if(!data.length){
+    document.getElementById('k-total').textContent='0';
+    ['k-today','k-rate','k-open','k-nonamc','k-week','k-month'].forEach(id=>document.getElementById(id).textContent=id==='k-rate'?'0%':'0');
+    document.getElementById('k-avg').textContent='—';
+    ['cStatus','cRCA','cRegion','cPlatform','cIssueType','cAmc','cMember'].forEach(id=>{ if(charts[id]){charts[id].destroy();delete charts[id];} });
+    document.getElementById('topCust').innerHTML='<p style="color:var(--muted);font-size:12px">No calls in this date range.</p>';
+    return;
+  }
   const today=datStr(new Date()),now=new Date();
   const ws=getWeekStart();
-  const todayD=callData.filter(c=>c.logDate===today);
-  const weekD=callData.filter(c=>new Date(c.logDate)>=ws);
-  const monthD=callData.filter(c=>{const d=new Date(c.logDate);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
-  const closed=callData.filter(c=>c.status==='Closed');
-  const open=getOpenCalls();
-  const nonamc=callData.filter(c=>c.amc==='No');
-  const avgH=callData.reduce((s,c)=>s+(c.hours||0),0)/callData.length;
-  document.getElementById('k-total').textContent=callData.length;
+  const todayD=data.filter(c=>c.logDate===today);
+  const weekD=data.filter(c=>new Date(c.logDate)>=ws);
+  const monthD=data.filter(c=>{const d=new Date(c.logDate);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  const closed=data.filter(c=>c.status==='Closed');
+  const open=data.filter(c=>c.status!=='Closed');
+  const nonamc=data.filter(c=>c.amc==='No');
+  const avgH=data.reduce((s,c)=>s+(c.hours||0),0)/data.length;
+  document.getElementById('k-total').textContent=data.length;
   document.getElementById('k-today').textContent=todayD.length;
   document.getElementById('k-today-dt').textContent=now.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
-  document.getElementById('k-rate').textContent=Math.round(closed.length/callData.length*100)+'%';
-  document.getElementById('k-closed').textContent=closed.length+' of '+callData.length;
+  document.getElementById('k-rate').textContent=Math.round(closed.length/data.length*100)+'%';
+  document.getElementById('k-closed').textContent=closed.length+' of '+data.length;
   document.getElementById('k-open').textContent=open.length;
   document.getElementById('k-nonamc').textContent=nonamc.length;
   document.getElementById('k-week').textContent=weekD.length;
   document.getElementById('k-month').textContent=monthD.length;
   document.getElementById('k-month-nm').textContent=now.toLocaleDateString('en-IN',{month:'long'});
-  document.getElementById('k-avg').textContent=avgH.toFixed(1)+'h';
-  mkChart('cStatus','doughnut',countBy(callData,'status'),['#2ecc71','#E8003D','#f39c12','#9b59b6','#7f8c8d']);
+  document.getElementById('k-avg').textContent=Math.round(avgH)+' min';
+  mkChart('cStatus','doughnut',countBy(data,'status'),['#2ecc71','#E8003D','#f39c12','#9b59b6','#7f8c8d']);
   const rcaMap={};
-  callData.forEach(c=>{const rca=(c.rootCause||'Unknown').split(' — ')[0];rcaMap[rca]=(rcaMap[rca]||0)+1;});
-  mkChart('cRCA','bar',rcaMap,COLORS);
-  mkChart('cRegion','bar',countBy(callData,'region'),COLORS);
-  mkChart('cPlatform','doughnut',countBy(callData,'platform'),COLORS);
-  mkChart('cIssueType','doughnut',countBy(callData,'issueType'),['#00c9c8','#f5a623']);
-  mkChart('cAmc','doughnut',countBy(callData,'amc'),['#2ecc71','#E8003D']);
+  data.forEach(c=>{const rca=(c.rootCause||'Unknown').split(' — ')[0];rcaMap[rca]=(rcaMap[rca]||0)+1;});
+  mkChart('cRCA','bar',rcaMap,COLORS,null,{x:'Root Cause',y:'Number of Calls'});
+  mkChart('cRegion','bar',countBy(data,'region'),COLORS,null,{x:'Region',y:'Number of Calls'});
+  mkChart('cPlatform','doughnut',countBy(data,'platform'),COLORS);
+  mkChart('cIssueType','doughnut',countBy(data,'issueType'),['#00c9c8','#f5a623']);
+  mkChart('cAmc','doughnut',countBy(data,'amc'),['#2ecc71','#E8003D']);
   const mm={};
-  MEMBERS.forEach(m=>{mm[m]=callData.filter(c=>c.resource===m||((c.supportResource||'')).includes(m)).length;});
-  mkChart('cMember','bar',mm,COLORS);
-  const cm=countBy(callData,'customer');
+  MEMBERS.forEach(m=>{mm[m]=data.filter(c=>c.resource===m||((c.supportResource||'')).includes(m)).length;});
+  mkChart('cMember','bar',mm,COLORS,null,{x:'Team Member',y:'Number of Calls (Primary + Support)'});
+  const cm=countBy(data,'customer');
   const sorted=Object.entries(cm).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const max=sorted[0]?.[1]||1;
   document.getElementById('topCust').innerHTML=sorted.map(([name,cnt],i)=>`
@@ -2821,15 +3233,18 @@ function badge2(p){
 function filterData(){
   const s=(document.getElementById('fSearch')||{}).value?.toLowerCase()||'';
   const st=(document.getElementById('fStatus')||{}).value||'';
-  const mb=(document.getElementById('fMember')||{}).value||'';
-  const dt=(document.getElementById('fDate')||{}).value||'';
+  const mb=(document.getElementById('fMember')||{}).value?.toLowerCase().trim()||'';
+  const dtFrom=(document.getElementById('fDateFrom')||{}).value||'';
+  const dtTo=(document.getElementById('fDateTo')||{}).value||'';
   const sh=(document.getElementById('fShift')||{}).value||'';
   return callData.filter(c=>{
     if(s&&![c.customer,c.issue,c.resource,c.rootCause,c.platform,c.systemType,c.location].join(' ').toLowerCase().includes(s)) return false;
     if(st&&c.status!==st) return false;
-    if(mb&&c.resource!==mb&&!(c.supportResource||'').includes(mb)) return false;
+    if(mb&&!((c.resource||'').toLowerCase().includes(mb)||(c.supportResource||'').toLowerCase().includes(mb))) return false;
     if(sh&&c.shift!==sh) return false;
-    if(dt&&(c.reportDate||c.logDate)!==dt) return false;
+    const d=c.reportDate||c.logDate;
+    if(dtFrom&&d<dtFrom) return false;
+    if(dtTo&&d>dtTo) return false;
     return true;
   });
 }
@@ -2850,7 +3265,7 @@ function renderTable(){
       <td style="font-size:10px;font-weight:700">${c.resource}</td>
       <td style="font-size:10px;color:var(--muted)">${c.supportResource||'—'}</td>
       <td style="font-size:10px">${c.responseTime||'—'}m</td>
-      <td style="font-weight:700">${c.hours}h</td>
+      <td style="font-weight:700">${c.hours}m</td>
       <td>${badge2(c.priority||'Medium')}</td>
       <td>${badge(c.status)}</td>
       <td><span class="badge ${c.amc==='Yes'?'bg-green':'bg-red'}">${c.amc}</span></td>
@@ -2876,7 +3291,7 @@ function showDetailModal(id){
       ${dItem('Location',c.location)} ${dItem('AMC',c.amc)}
       ${dItem('Contact',c.contactName+' — '+c.contactInfo)} ${dItem('Status',c.status)}
       ${dItem('Platform',c.platform)} ${dItem('System',c.systemType)}
-      ${dItem('Root Cause',c.rootCause)} ${dItem('Hours',c.hours+'h')}
+      ${dItem('Root Cause',c.rootCause)} ${dItem('Time Spent',c.hours+' min')}
       ${dItem('Primary Resource',c.resource)} ${dItem('Support Resource',c.supportResource||'—')}
       ${dItem('First Response',c.responseTime?c.responseTime+' mins':'—')} ${dItem('Priority',c.priority||'Medium')}
       ${dItem('Reported',c.reportDate+' '+c.reportTime)} ${dItem('Resolved',c.resolveDate||'Pending')}
@@ -2957,6 +3372,16 @@ function renderOpenCalls(){
 // PERFORMANCE
 // =============================================
 function getPerfData(){
+  const from=(document.getElementById('perfFrom')||{}).value||'';
+  const to=(document.getElementById('perfTo')||{}).value||'';
+  if(from||to){
+    return callData.filter(c=>{
+      const d=c.reportDate||c.logDate;
+      if(from&&d<from) return false;
+      if(to&&d>to) return false;
+      return true;
+    });
+  }
   const period=document.getElementById('perfPeriod')?.value||'all';
   let data=callData;
   const now=new Date(),today=datStr(now),ws=getWeekStart();
@@ -2987,13 +3412,13 @@ function renderPerformance(){
       <div class="mc-stat"><span>Closed</span><span class="v" style="color:var(--green)">${closed}</span></div>
       <div class="mc-stat"><span>Open/Pending</span><span class="v" style="color:var(--red)">${mData.length-closed}</span></div>
       <div class="mc-stat"><span>Resolution Rate</span><span class="v">${rate}%</span></div>
-      <div class="mc-stat"><span>Total Hours</span><span class="v">${hrs.toFixed(1)}h</span></div>
+      <div class="mc-stat"><span>Total Minutes</span><span class="v">${Math.round(hrs)}m</span></div>
       <div class="mc-stat"><span>Avg Response</span><span class="v">${avgResp?avgResp.toFixed(0)+'m':'—'}</span></div>
     </div>`;
   }).join('');
-  mkChart('cHours','bar',hoursMap,COLORS);
-  mkChart('cResp','bar',respMap,COLORS);
-  mkChart('cResRate','bar',rateMap,COLORS);
+  mkChart('cHours','bar',hoursMap,COLORS,null,{x:'Team Member',y:'Total Minutes Logged (min)'});
+  mkChart('cResp','bar',respMap,COLORS,null,{x:'Team Member',y:'Avg First Response Time (min)'});
+  mkChart('cResRate','bar',rateMap,COLORS,null,{x:'Team Member',y:'Resolution Rate (%)'});
 }
 
 // =============================================
@@ -3006,20 +3431,34 @@ function calcScore(m,data){
   const hrs=mData.reduce((s,c)=>s+(c.hours||0),0);
   const rate=mData.length?closed/mData.length:0;
   const avgResp=mData.filter(c=>c.responseTime>0).reduce((s,c,_,a)=>s+c.responseTime/a.length,0);
-  return Math.round(mData.length*3 + closed*2 + rate*30 + supp.length*1 - (avgResp/10) + hrs);
+  return Math.round(mData.length*3 + closed*2 + rate*30 + supp.length*1 - (avgResp/10) + hrs/60);
 }
 function renderChampion(){
   const period=document.getElementById('champPeriod')?.value||'week';
+  const from=(document.getElementById('champFrom')||{}).value||'';
+  const to=(document.getElementById('champTo')||{}).value||'';
+  const customRange = !!(from||to);
   let data=callData;
   const now=new Date(),ws=getWeekStart();
-  if(period==='week') data=data.filter(c=>new Date(c.logDate)>=ws);
-  else if(period==='month') data=data.filter(c=>{const d=new Date(c.logDate);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  let periodLabel;
+  if(customRange){
+    data=data.filter(c=>{
+      const d=c.reportDate||c.logDate;
+      if(from&&d<from) return false;
+      if(to&&d>to) return false;
+      return true;
+    });
+    periodLabel = (from||'…')+' to '+(to||'…');
+  } else {
+    if(period==='week') data=data.filter(c=>new Date(c.logDate)>=ws);
+    else if(period==='month') data=data.filter(c=>{const d=new Date(c.logDate);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+    periodLabel = {week:'This Week',month:'This Month',all:'All Time'}[period];
+  }
   const scores=MEMBERS.map(m=>({m,score:calcScore(m,data),calls:data.filter(c=>c.resource===m).length}))
     .sort((a,b)=>b.score-a.score);
   const [first,second,third]=scores;
-  const periods={week:'This Week',month:'This Month',all:'All Time'};
   const podiumHtml=`
-    <div style="margin-bottom:8px;font-size:14px;color:var(--muted)">${periods[period]} Champions</div>
+    <div style="margin-bottom:8px;font-size:14px;color:var(--muted)">${periodLabel} Champions</div>
     <div style="display:flex;align-items:flex-end;justify-content:center;gap:16px;padding:20px 0">
       ${second?`<div class="podium-slot">
         <div class="podium-rank">🥈</div>
@@ -3044,7 +3483,7 @@ function renderChampion(){
     ${first?`<div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border-radius:12px;padding:16px;margin-bottom:20px;text-align:center;border:1px solid var(--gold)">
       <div style="font-size:24px">🎉</div>
       <div style="font-size:16px;font-weight:800;color:var(--dark);margin:4px 0">Congratulations ${first.m}!</div>
-      <div style="font-size:12px;color:var(--muted)">Top performer ${periods[period].toLowerCase()} with ${first.score} points and ${first.calls} calls handled. Outstanding contribution to the team! 🌟</div>
+      <div style="font-size:12px;color:var(--muted)">Top performer for ${periodLabel} with ${first.score} points and ${first.calls} calls handled. Outstanding contribution to the team! 🌟</div>
     </div>`:''}`;
   document.getElementById('champPodium').innerHTML=podiumHtml;
   const grid=document.getElementById('champGrid'); if(!grid) return;
@@ -3159,7 +3598,7 @@ function renderNonAmc(){
         <span class="badge bg-blue">${c.platform}</span>
         <span class="badge bg-dark">${c.systemType}</span>
         <span class="badge bg-teal">${c.resource}</span>
-        <span class="badge bg-gray">${c.hours}h</span>
+        <span class="badge bg-gray">${c.hours}m</span>
         <span class="badge bg-orange">${c.rootCause?.split(' — ')[0]}</span>
       </div>
       <div style="display:flex;gap:8px">
@@ -3211,17 +3650,17 @@ function renderRepeatedIssues(){
 function exportExcel(){
   const data=filterData(); if(!data.length){showToast('No data','error');return;}
   const wb=XLSX.utils.book_new();
-  const headers=['Sr','Log Date','Log Time','Shift','Logged By','Customer','Region','Location','AMC','Contact Name','Contact Info','Issue','JIRA','Primary Resource','Support Resource','Reported Date','Reported Time','Resolve Date','Issue Type','Platform','System','Version','Serial','Priority','First Response (mins)','Analysis','Resolution','Remarks','Root Cause','Hours','Status'];
+  const headers=['Sr','Log Date','Log Time','Shift','Logged By','Customer','Region','Location','AMC','Contact Name','Contact Info','Issue','JIRA','Primary Resource','Support Resource','Reported Date','Reported Time','Resolve Date','Issue Type','Platform','System','Version','Serial','Priority','First Response (mins)','Analysis','Resolution','Remarks','Root Cause','Minutes Spent','Status'];
   const rows=data.map((c,i)=>[i+1,c.logDate,c.logTime,c.shift,c.loggedBy,c.customer,c.region,c.location,c.amc,c.contactName,c.contactInfo,c.issue,c.jira,c.resource,c.supportResource||'—',c.reportDate,c.reportTime,c.resolveDate||'',c.issueType,c.platform,c.systemType,c.version,c.serial,c.priority||'Medium',c.responseTime||0,c.analysis,c.resolution,c.remarks,c.rootCause,c.hours,c.status]);
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([headers,...rows]),'Call Logs');
-  const sh2=['Member','Total','Closed','Open','Rate%','Hours','Avg Response(m)','Calls Supported'];
+  const sh2=['Member','Total','Closed','Open','Rate%','Minutes','Avg Response(m)','Calls Supported'];
   const sr2=MEMBERS.map(m=>{
     const md=data.filter(c=>c.resource===m);
     const cl=md.filter(c=>c.status==='Closed').length;
     const hrs=md.reduce((s,c)=>s+(c.hours||0),0);
     const ar=md.filter(c=>c.responseTime>0).reduce((s,c,_,a)=>s+c.responseTime/a.length,0);
     const supp=data.filter(c=>(c.supportResource||'').includes(m)).length;
-    return [m,md.length,cl,md.length-cl,md.length?Math.round(cl/md.length*100):0,hrs.toFixed(1),ar.toFixed(0),supp];
+    return [m,md.length,cl,md.length-cl,md.length?Math.round(cl/md.length*100):0,Math.round(hrs),ar.toFixed(0),supp];
   });
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([sh2,...sr2]),'Member Summary');
   XLSX.writeFile(wb,`ACGI_Support_${datStr(new Date())}.xlsx`);
@@ -3258,12 +3697,12 @@ function sendMailReport(){
   const hrs=data.reduce((s,c)=>s+(c.hours||0),0);
   const clean=v=>String(v==null?'':v).replace(/[\r\n\t]+/g,' ').trim();
   let body=`ACGI 24×7 Support — ${sh||'All'} Shift Report\nDate: ${dt||'All'}\nGenerated by: ${currentUser.name}\n`;
-  body+=`Total: ${data.length}  |  Closed: ${closed}  |  Open: ${data.length-closed}  |  Hours: ${hrs.toFixed(1)}h\n\n`;
+  body+=`Total: ${data.length}  |  Closed: ${closed}  |  Open: ${data.length-closed}  |  Minutes: ${Math.round(hrs)}m\n\n`;
   body+=`(Tip: select from "Sr" below through the last row, copy, and paste directly into Excel — it will land in proper columns.)\n\n`;
   const headers=['Sr','Date','Time','Shift','Logged By','Customer','Region','Location','AMC','Contact Name',
     'Contact Info','Issue','JIRA','Primary Resource','Support Resource','Issue Type','Platform','System',
     'Version','Serial','Priority','First Response (mins)','Root Cause','Analysis','Resolution','Remarks',
-    'Hours','Status'];
+    'Minutes Spent','Status'];
   const rows=data.map((c,i)=>[i+1,c.reportDate||c.logDate,c.reportTime||c.logTime,c.shift,c.loggedBy,c.customer,
     c.region,c.location,c.amc,c.contactName,c.contactInfo,c.issue,c.jira,c.resource,c.supportResource||'',
     c.issueType,c.platform,c.systemType,c.version,c.serial,c.priority||'Medium',c.responseTime||0,c.rootCause,
@@ -3301,7 +3740,8 @@ const FB_MEMBERS = [
   {name:"Deshraj",    col:"#D97706"},
   {name:"Vivek",      col:"#16A34A"},
   {name:"Ganesh",     col:"#DC2626"},
-  {name:"Ashutosh",   col:"#0891B2"}
+  {name:"Ashutosh",   col:"#0891B2"},
+  {name:"Niranjan",   col:"#DB2777"}
 ];
 const EMOJIS = ["😣","😟","😑","😐","🙂","😊","😃","💪","🔥","⭐"];
 
@@ -3488,18 +3928,18 @@ function renderFeedbackDashboard(){
     commAvgs[m.name] = commVals.length ? +(commVals.reduce((a,b)=>a+b,0)/commVals.length).toFixed(2) : 0;
     perfAvgs[m.name] = perfVals.length ? +(perfVals.reduce((a,b)=>a+b,0)/perfVals.length).toFixed(2) : 0;
   });
-  mkChart('fbChartComm','bar',commAvgs, FB_MEMBERS.map(m=>m.col), (name)=>fbSetFilterAndRender('fbf-search', name.toLowerCase()));
-  mkChart('fbChartPerf','bar',perfAvgs, FB_MEMBERS.map(m=>m.col), (name)=>fbSetFilterAndRender('fbf-search', name.toLowerCase()));
-  mkChart('fbChartDims','bar',dimAvgs);
+  mkChart('fbChartComm','bar',commAvgs, FB_MEMBERS.map(m=>m.col), (name)=>fbSetFilterAndRender('fbf-search', name.toLowerCase()), {x:'Team Member',y:'Avg Communication Rating (out of 5)'});
+  mkChart('fbChartPerf','bar',perfAvgs, FB_MEMBERS.map(m=>m.col), (name)=>fbSetFilterAndRender('fbf-search', name.toLowerCase()), {x:'Team Member',y:'Avg Performance Rating (out of 5)'});
+  mkChart('fbChartDims','bar',dimAvgs,null,null,{x:'Feedback Dimension',y:'Avg Score (out of 10)'});
 
   const tally = (field)=>{
     const counts = {};
     data.forEach(d=>(d[field]||'').split(',').map(s=>s.trim()).filter(v=>v && v!=='NA').forEach(v=>counts[v]=(counts[v]||0)+1));
     return counts;
   };
-  mkChart('fbChartCollab','bar', tally('top_collaborators'), null, (name)=>fbSetFilterAndRender('fbf-search', name.toLowerCase()));
+  mkChart('fbChartCollab','bar', tally('top_collaborators'), null, (name)=>fbSetFilterAndRender('fbf-search', name.toLowerCase()), {x:'Team Member',y:'Times Mentioned as Top Collaborator'});
   mkChart('fbChartMorale','doughnut', tally('morale_tags'), null, (tag)=>fbSetFilterAndRender('fbf-search', tag.toLowerCase()));
-  mkChart('fbChartFocus','bar', tally('focus_areas'), null, (tag)=>fbSetFilterAndRender('fbf-search', tag.toLowerCase()));
+  mkChart('fbChartFocus','bar', tally('focus_areas'), null, (tag)=>fbSetFilterAndRender('fbf-search', tag.toLowerCase()), {x:'Focus Area',y:'Times Mentioned'});
 
   renderThemeCloud(data);
   renderCommentsFeed(data, f.q);
@@ -3556,6 +3996,193 @@ function renderCommentsFeed(data, searchTerm){
       <div class="fb-comment-text">${e.text}</div>
     </div>`).join('');
 }
+
+// =============================================
+// PER PERSON — individual review, insights & growth ideas
+// =============================================
+function ppColor(name){
+  const idx = MEMBERS.indexOf(name);
+  return COLORS[idx>=0 ? idx % COLORS.length : 0];
+}
+function ppPeriodStart(period){
+  const now = new Date();
+  if(period==='week') return getWeekStart();
+  if(period==='month') return new Date(now.getFullYear(), now.getMonth(), 1);
+  if(period==='quarter'){ const d=new Date(now); d.setDate(d.getDate()-90); return d; }
+  return null;
+}
+function ppTeamFeedbackAverages(fbData){
+  let allComm=[], allPerf=[];
+  FB_MEMBERS.forEach(m=>{
+    const k=fbFieldKey(m.name);
+    fbData.forEach(d=>{
+      const c=parseFloat(d['comm_'+k]); if(!isNaN(c)&&c>0) allComm.push(c);
+      const p=parseFloat(d['perf_'+k]); if(!isNaN(p)&&p>0) allPerf.push(p);
+    });
+  });
+  const avg=(arr)=>arr.length? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+  return {comm:avg(allComm), perf:avg(allPerf)};
+}
+function ppTeamCallAverages(){
+  const perMember = MEMBERS.map(m=>{
+    const mine = callData.filter(c=>c.resource===m);
+    const closed = mine.filter(c=>c.status==='Closed');
+    const hrs = closed.length ? closed.reduce((s,c)=>s+(c.hours||0),0)/closed.length : 0;
+    const respVals = mine.filter(c=>c.responseTime>0).map(c=>c.responseTime);
+    const resp = respVals.length ? respVals.reduce((a,b)=>a+b,0)/respVals.length : 0;
+    const rate = mine.length ? closed.length/mine.length*100 : 0;
+    return {calls:mine.length, hrs, resp, rate};
+  }).filter(x=>x.calls>0);
+  const avg=(key)=> perMember.length ? perMember.reduce((s,x)=>s+x[key],0)/perMember.length : 0;
+  return {calls:avg('calls'), hrs:avg('hrs'), resp:avg('resp'), rate:avg('rate')};
+}
+function populatePerPersonSelect(){
+  const sel = document.getElementById('ppMember');
+  if(sel.dataset.filled) return;
+  sel.innerHTML = MEMBERS.map(m=>`<option value="${m}">${m}</option>`).join('');
+  sel.dataset.filled = '1';
+  if(currentUser && MEMBERS.includes(currentUser.name)) sel.value = currentUser.name;
+}
+function renderPerPerson(){
+  populatePerPersonSelect();
+  const sel = document.getElementById('ppMember');
+  const person = sel.value || MEMBERS[0];
+  sel.value = person;
+  const period = document.getElementById('ppPeriod').value;
+  const start = ppPeriodStart(period);
+  const periodLabel = {all:'All Time', week:'This Week', month:'This Month', quarter:'Last 90 Days'}[period];
+
+  const allPersonCalls = callData.filter(c=>c.resource===person);
+  const supportCalls = callData.filter(c=>(c.supportResource||'').includes(person));
+  let primaryOnly = start ? allPersonCalls.filter(c=>new Date(c.logDate)>=start) : allPersonCalls;
+  const supportInPeriod = start ? supportCalls.filter(c=>new Date(c.logDate)>=start) : supportCalls;
+
+  const color = ppColor(person);
+  document.getElementById('ppHero').innerHTML = `
+    <div class="pp-avatar" style="background:${color}">${person.charAt(0).toUpperCase()}</div>
+    <div>
+      <h3>${person}</h3>
+      <div class="pp-meta"><span class="pp-badge">${periodLabel}</span>${primaryOnly.length} calls as primary resource · ${supportInPeriod.length} as support</div>
+    </div>`;
+
+  const closed = primaryOnly.filter(c=>c.status==='Closed');
+  const openC = primaryOnly.filter(c=>c.status!=='Closed');
+  const avgHrs = closed.length ? closed.reduce((s,c)=>s+(c.hours||0),0)/closed.length : 0;
+  const respVals = primaryOnly.filter(c=>c.responseTime>0).map(c=>c.responseTime);
+  const avgResp = respVals.length ? respVals.reduce((a,b)=>a+b,0)/respVals.length : 0;
+  const closureRate = primaryOnly.length ? (closed.length/primaryOnly.length*100) : 0;
+
+  document.getElementById('ppKpis').innerHTML = `
+    <div class="kpi k-red"><div class="kpi-label">Calls Handled</div><div class="kpi-value">${primaryOnly.length}</div><div class="kpi-sub">${closed.length} closed · ${openC.length} open</div><div class="kpi-icon">📞</div></div>
+    <div class="kpi k-teal"><div class="kpi-label">Closure Rate</div><div class="kpi-value">${closureRate.toFixed(0)}%</div><div class="kpi-sub">of handled calls</div><div class="kpi-icon">✅</div></div>
+    <div class="kpi k-gold"><div class="kpi-label">Avg Resolution Time</div><div class="kpi-value">${avgHrs?Math.round(avgHrs)+'m':'—'}</div><div class="kpi-sub">on closed calls</div><div class="kpi-icon">⏱️</div></div>
+    <div class="kpi k-blue"><div class="kpi-label">Avg First Response</div><div class="kpi-value">${avgResp?avgResp.toFixed(0)+'m':'—'}</div><div class="kpi-sub">minutes</div><div class="kpi-icon">⚡</div></div>`;
+
+  // Trend: last 6 active months, all-time (gives fuller picture regardless of period filter)
+  const monthMap = {};
+  allPersonCalls.forEach(c=>{
+    const d = new Date(c.logDate); if(isNaN(d)) return;
+    const ym = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(!monthMap[ym]) monthMap[ym] = {label:d.toLocaleDateString('en-IN',{month:'short',year:'2-digit'}), count:0};
+    monthMap[ym].count++;
+  });
+  const monthKeys = Object.keys(monthMap).sort().slice(-6);
+  const trendObj = {}; monthKeys.forEach(k=>trendObj[monthMap[k].label]=monthMap[k].count);
+  mkChart('ppTrend','bar', Object.keys(trendObj).length?trendObj:{'No data':0}, [color], null, {x:'Month',y:'Number of Calls'});
+  mkChart('ppStatus','doughnut', Object.keys(countBy(primaryOnly,'status')).length?countBy(primaryOnly,'status'):{'No data':1});
+  const rcaCounts = countBy(primaryOnly.filter(c=>c.rootCause), 'rootCause');
+  const topRca = Object.fromEntries(Object.entries(rcaCounts).sort((a,b)=>b[1]-a[1]).slice(0,6));
+  mkChart('ppRca','bar', Object.keys(topRca).length?topRca:{'No data':0}, null, null, {x:'Root Cause',y:'Number of Calls'});
+
+  const fbData = CLOUD.feedbackSubmissions || [];
+  const key = fbFieldKey(person);
+  const commVals = fbData.map(d=>parseFloat(d['comm_'+key])).filter(v=>!isNaN(v)&&v>0);
+  const perfVals = fbData.map(d=>parseFloat(d['perf_'+key])).filter(v=>!isNaN(v)&&v>0);
+  const personComm = commVals.length ? commVals.reduce((a,b)=>a+b,0)/commVals.length : 0;
+  const personPerf = perfVals.length ? perfVals.reduce((a,b)=>a+b,0)/perfVals.length : 0;
+  const teamFb = ppTeamFeedbackAverages(fbData);
+  mkChart('ppFb','bar', {
+    [person+' — Comm']: +personComm.toFixed(2), 'Team Avg — Comm': +teamFb.comm.toFixed(2),
+    [person+' — Perf']: +personPerf.toFixed(2), 'Team Avg — Perf': +teamFb.perf.toFixed(2)
+  }, [color,'#cbd5e1',color,'#cbd5e1'], null, {x:'Metric',y:'Avg Rating (out of 5)'});
+
+  // ---- Rule-based insights: compare this person to team-wide averages ----
+  const teamCalls = ppTeamCallAverages();
+  const strengths = [], improve = [];
+  const hasCalls = allPersonCalls.length >= 3;
+  if(hasCalls){
+    if(closureRate >= teamCalls.rate + 5) strengths.push(`Closure rate of <strong>${closureRate.toFixed(0)}%</strong> is above the team average (${teamCalls.rate.toFixed(0)}%).`);
+    else if(closureRate < teamCalls.rate - 8) improve.push(`Closure rate (${closureRate.toFixed(0)}%) is below the team average (${teamCalls.rate.toFixed(0)}%) — worth reviewing what's keeping calls open.`);
+    if(avgResp && teamCalls.resp && avgResp <= teamCalls.resp*0.85) strengths.push(`Faster first response (${avgResp.toFixed(0)}m) than the team average (${teamCalls.resp.toFixed(0)}m).`);
+    else if(avgResp && teamCalls.resp && avgResp > teamCalls.resp*1.2) improve.push(`First response time (${avgResp.toFixed(0)}m) is slower than the team average (${teamCalls.resp.toFixed(0)}m).`);
+    if(avgHrs && teamCalls.hrs && avgHrs <= teamCalls.hrs*0.85) strengths.push(`Resolves calls faster than average — ${Math.round(avgHrs)}m vs team's ${Math.round(teamCalls.hrs)}m.`);
+    else if(avgHrs && teamCalls.hrs && avgHrs > teamCalls.hrs*1.25) improve.push(`Average resolution time (${Math.round(avgHrs)}m) runs higher than the team's ${Math.round(teamCalls.hrs)}m.`);
+    if(supportCalls.length >= teamCalls.calls*0.3) strengths.push(`Frequently steps in as a support resource on teammates' calls (${supportCalls.length} calls).`);
+    if(allPersonCalls.length >= teamCalls.calls*1.3) strengths.push(`One of the most active call handlers on the team (${allPersonCalls.length} calls all-time).`);
+    else if(allPersonCalls.length < teamCalls.calls*0.5) improve.push(`Call volume (${allPersonCalls.length}) is noticeably lower than the team average (${teamCalls.calls.toFixed(0)}) — worth checking workload balance.`);
+  }
+  const collabMentions = fbData.filter(d=>(d.top_collaborators||'').toLowerCase().includes(person.toLowerCase())).length;
+  if(collabMentions>=2) strengths.push(`Named a top collaborator by peers in ${collabMentions} feedback submission${collabMentions>1?'s':''}.`);
+  if(commVals.length){
+    if(personComm>=4.2) strengths.push(`Rated highly by peers for communication (${personComm.toFixed(1)}/5).`);
+    else if(personComm<3) improve.push(`Peer communication rating (${personComm.toFixed(1)}/5) is below target — proactive customer/team updates could help.`);
+  } else {
+    improve.push(`No peer communication ratings recorded yet — encourage team leads to include ${person} in their next feedback submission.`);
+  }
+  if(perfVals.length){
+    if(personPerf>=4.2) strengths.push(`Rated highly by peers for overall performance (${personPerf.toFixed(1)}/5).`);
+    else if(personPerf<3) improve.push(`Peer performance rating (${personPerf.toFixed(1)}/5) is below target.`);
+  }
+  if(!strengths.length) strengths.push(`Not enough data yet to confidently call out a standout strength — check back after a few more calls or feedback cycles.`);
+  if(!improve.length) improve.push(`No specific concerns stand out right now — keep up the consistency.`);
+
+  document.getElementById('ppStrengths').innerHTML = strengths.slice(0,6).map(s=>`<li>${s}</li>`).join('');
+  document.getElementById('ppImprove').innerHTML = improve.slice(0,6).map(s=>`<li>${s}</li>`).join('');
+
+  // ---- Peer "voice": every free-text feedback comment mentioning this person ----
+  const voiceEntries = [];
+  fbData.forEach(d=>{
+    const when = d.created_at ? new Date(d.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : (d.submission_date||'');
+    FB_TEXT_FIELDS.forEach(t=>{
+      const text=(d[t.key]||'').trim();
+      if(text && text!=='NA' && text.toLowerCase().includes(person.toLowerCase())){
+        voiceEntries.push({who:d.team_lead_name||'Anonymous', when, tag:t.tag, text});
+      }
+    });
+    if((d.top_collaborators||'').toLowerCase().includes(person.toLowerCase())){
+      voiceEntries.push({who:d.team_lead_name||'Anonymous', when, tag:'🤝 Top Collaborator', text: d.collaboration_notes && d.collaboration_notes!=='NA' ? d.collaboration_notes : 'Named as a strong collaborator this period.'});
+    }
+  });
+  const voiceEl = document.getElementById('ppVoice');
+  voiceEl.innerHTML = voiceEntries.length ? voiceEntries.slice(0,60).map(e=>`
+    <div class="fb-comment-card">
+      <div class="fb-comment-hd"><div><span class="fb-comment-tag">${e.tag}</span><span class="fb-comment-who">${e.who}</span></div><div class="fb-comment-when">${e.when}</div></div>
+      <div class="fb-comment-text">${e.text}</div>
+    </div>`).join('') : `<p style="color:var(--muted);font-size:12px;padding:10px 0">No peer comments mention ${person} by name yet.</p>`;
+
+  // ---- Growth ideas: tailored (from the same signals above) + evergreen list ----
+  const tailored = [];
+  if(avgResp && teamCalls.resp && avgResp > teamCalls.resp*1.2) tailored.push(`Shadow a teammate with faster first-response times to pick up quick-triage habits.`);
+  if(avgHrs && teamCalls.hrs && avgHrs > teamCalls.hrs*1.25) tailored.push(`Pair on a few calls with a faster-resolving teammate to learn their troubleshooting shortcuts.`);
+  if(commVals.length && personComm<3.5) tailored.push(`Consider a short communication-skills refresher, or shadow someone known for clear customer updates.`);
+  if(Object.keys(topRca).length) tailored.push(`Has handled several "${Object.keys(topRca)[0]}" cases — a good candidate to author or refresh the SOP for this issue type.`);
+  if(strengths.length>=3 && closureRate>=teamCalls.rate) tailored.push(`Performing strongly overall — a good moment to discuss mentoring a newer teammate or owning a specialised issue category.`);
+  if(supportCalls.length>=teamCalls.calls*0.3 && allPersonCalls.length<teamCalls.calls) tailored.push(`Strong support contributor — worth discussing a path to taking on more calls as primary resource.`);
+  if(!tailored.length) tailored.push(`Nothing specific flagged this period — use the evergreen ideas alongside a regular 1:1 check-in.`);
+
+  const PP_GENERAL_IDEAS = [
+    'Run a short knowledge-sharing session once a month — teach the team one SOP or tricky-call learning.',
+    'Set one personal quarterly goal (e.g. shave 10% off average response time) and revisit it here next quarter.',
+    'Volunteer to author or refresh one SOP based on a recent challenging call.',
+    'Shadow a teammate handling a different issue type or platform to broaden technical range.',
+    'Ask for specific feedback from your HOD between formal review cycles rather than only at survey time.',
+    'Share small wins in team standups — a fast resolution or a good customer comment is worth celebrating.'
+  ];
+  document.getElementById('ppTailoredTitle').textContent = 'Tailored ideas for '+person;
+  document.getElementById('ppTailored').innerHTML = tailored.slice(0,4).map(s=>`<li>${s}</li>`).join('');
+  document.getElementById('ppGeneral').innerHTML = PP_GENERAL_IDEAS.map(s=>`<li>${s}</li>`).join('');
+}
+
 function showFeedbackDetail(id){
   const d = (CLOUD.feedbackSubmissions||[]).find(x=>x.id===id); if(!d) return;
   document.getElementById('detailModalTitle').textContent = '💬 Feedback Detail';
@@ -3646,6 +4273,7 @@ async function submitFeedback() {
   comm_vivek: String(commR["Vivek"] || "0"),
   comm_ganesh: String(commR["Ganesh"] || "0"),
   comm_ashutosh: String(commR["Ashutosh"] || "0"),
+  comm_niranjan: String(commR["Niranjan"] || "0"),
 
   top_collaborators: getChips("col") || "NA",
   collaboration_notes: fbv("collab-note") || "NA",
@@ -3672,6 +4300,7 @@ async function submitFeedback() {
   perf_vivek: String(perfR["Vivek"] || "0"),
   perf_ganesh: String(perfR["Ganesh"] || "0"),
   perf_ashutosh: String(perfR["Ashutosh"] || "0"),
+  perf_niranjan: String(perfR["Niranjan"] || "0"),
 
   leadership_rating: String(getRating("ld") || "0"),
   leadership_strength: fbv("ld-str") || "NA",
@@ -3717,6 +4346,216 @@ async function retrySubmit() {
 
 // Build the feedback module's UI once at application start
 initFeedbackModule();
+
+// =============================================
+// VASUKI — creative guide-bot (snake navigation + auto-learning knowledge base)
+// =============================================
+const NAV_INTENTS = [
+  {tab:'dashboard', label:'Dashboard', kw:['dashboard','overview','summary stats','kpi','home screen']},
+  {tab:'callLog', label:'Log a Call', kw:['log a call','new call','create call','add call','log call','submit a call','enter a call']},
+  {tab:'callLog', label:'Import Previous Calls', kw:['import','bulk import','excel import','upload excel','import previous calls','import template'],
+    after:()=>{ const el=document.getElementById('callImportFile'); if(el&&el.closest('.card')) el.closest('.card').scrollIntoView({behavior:'smooth',block:'center'}); }},
+  {tab:'allCalls', label:'All Calls', kw:['all calls','call records','call history','search calls','export excel','email report','call list']},
+  {tab:'openCalls', label:'Open Calls', kw:['open calls','pending calls','in process','in-process','unresolved calls']},
+  {tab:'champion', label:'Champions', kw:['champion','leaderboard','top performer','ranking','podium']},
+  {tab:'performance', label:'Performance', kw:['performance tab','performance metrics','scoring','member scores']},
+  {tab:'sops', label:'SOPs', kw:['sop','standard operating procedure','knowledge base','sops','procedure document']},
+  {tab:'nonAmc', label:'Non-AMC Follow-up', kw:['non amc','non-amc','amc follow up','commercial follow up']},
+  {tab:'repeatedIssues', label:'Repeated Issues', kw:['repeated issue','recurring issue','repeat problem']},
+  {tab:'pmFollowup', label:'PM Follow-up', kw:['pm follow up','preventive maintenance']},
+  {tab:'feedback', label:'Submit Team Feedback', kw:['submit feedback','feedback form','fill feedback','give feedback','feedback survey'],
+    after:()=>{ if(typeof showFeedbackSubtab==='function') showFeedbackSubtab('submit'); }},
+  {tab:'feedback', label:'Feedback Dashboard', kw:['feedback dashboard','feedback results','team voice','feedback trends','who submitted feedback'],
+    after:()=>{ if(typeof showFeedbackSubtab==='function') showFeedbackSubtab('dashboard'); }},
+  {tab:'perPerson', label:'Per Person Review', kw:['per person','individual review','my growth','my strengths','improvement points','growth ideas','personal review']},
+  {tab:'profile', label:'My Profile', kw:['my profile','profile photo','update my details','change my phone']},
+  {tab:'rolesRights', label:'Roles & Rights — Roles', kw:['roles and rights','module permission','view or edit access','who can edit','access matrix'],
+    after:()=>{ if(typeof showRolesSubtab==='function') showRolesSubtab('roles'); }},
+  {tab:'rolesRights', label:'Roles & Rights — Rights', kw:['assign a role','change someone role','make someone manager','make someone hod'],
+    after:()=>{ if(typeof showRolesSubtab==='function') showRolesSubtab('rights'); }},
+  {tab:'logs', label:'System Logs', kw:['system logs','activity log','audit log','who did what']},
+  {tab:'about', label:'About', kw:['about page','app version','help page']}
+];
+const FAQ_INTENTS = [
+  {kw:['what is hod','what does hod mean','meaning of hod'], a:'<strong>HOD</strong> stands for Head of Department — one of the three Access Roles (with Engineer and Manager). By default HOD gets full edit rights everywhere, but your admin can fine-tune exactly what each role can view or edit from Roles & Rights.'},
+  {kw:['difference between view and edit','view vs edit','what can i edit','why cant i edit',"why can't i edit"], a:"<strong>View</strong> means read-only — you can see the data but not change it. <strong>Edit</strong> means you can add, update, close or delete records in that module. Which one you get, per module, is decided by your admin in Roles &amp; Rights → Roles."},
+  {kw:['who is admin','who is the admin','who is pawan'], a:'Pawan is the portal admin. Only the admin can access Roles &amp; Rights and decide who can view/edit which modules.'},
+  {kw:['password','forgot password','reset password','login issue'], a:"I can't help with account credentials for security reasons — please reach out to Pawan (the admin) directly if you're having trouble signing in."},
+  {kw:['how is score calculated','how is performance calculated','how is champion decided'], a:'Scores combine how many calls you\'ve handled, your resolution rate, and your average response/resolution speed — see the full breakdown on the Performance tab.'},
+  {kw:['what does this portal do','what can you do','what is this app','who are you'], a:"I'm Vasuki 🐍 — tell me a module name (like \"open calls\" or \"SOPs\") and I'll guide you there, or describe an issue you're facing and I'll dig through past calls and SOPs for a resolution."}
+];
+const VASUKI_STOPWORDS = new Set(['what','where','when','which','who','how','the','a','an','is','are','do','does','did','can','could','i','me','my','to','for','of','in','on','at','it','its',"it's",'this','that','with','please','need','want','find','show','tell','about','and','or']);
+function vTokenize(s){ return (String(s||'').toLowerCase().match(/[a-z0-9']{3,}/g)||[]).filter(w=>!VASUKI_STOPWORDS.has(w)); }
+function matchFaq(query){
+  const q = query.toLowerCase();
+  for(const f of FAQ_INTENTS){ if(f.kw.some(k=>q.includes(k))) return f; }
+  return null;
+}
+function matchNav(query){
+  const q = query.toLowerCase();
+  let best=null, bestScore=0;
+  NAV_INTENTS.forEach(n=>{
+    let score=0;
+    n.kw.forEach(k=>{ if(q.includes(k)) score = Math.max(score, k.split(' ').length); });
+    if(score>bestScore){ bestScore=score; best=n; }
+  });
+  return bestScore>0 ? best : null;
+}
+// This is the "auto-training": it searches whatever is currently in CLOUD.sops and
+// callData live, so every SOP written and every call logged/resolved is instantly
+// part of what Vasuki can answer from — no manual retraining step required.
+function searchKnowledgeBase(query){
+  const tokens = vTokenize(query);
+  if(tokens.length<1) return null;
+  let bestSop=null, bestSopScore=0;
+  (CLOUD.sops||[]).forEach(s=>{
+    const hay = [s.title,s.category,s.description,s.text].filter(Boolean).join(' ').toLowerCase();
+    let score=0; tokens.forEach(t=>{ if(hay.includes(t)) score++; if((s.title||'').toLowerCase().includes(t)) score+=2; });
+    if(score>bestSopScore){ bestSopScore=score; bestSop=s; }
+  });
+  let bestCall=null, bestCallScore=0;
+  (callData||[]).forEach(c=>{
+    if(!c.resolution && !c.analysis) return;
+    const hay = [c.issue,c.analysis,c.resolution,c.rootCause,c.platform,c.systemType].filter(Boolean).join(' ').toLowerCase();
+    let score=0; tokens.forEach(t=>{ if(hay.includes(t)) score++; if((c.issue||'').toLowerCase().includes(t)) score+=2; if((c.rootCause||'').toLowerCase().includes(t)) score+=1; });
+    if(c.status==='Closed') score+=0.5;
+    if(score>bestCallScore){ bestCallScore=score; bestCall=c; }
+  });
+  if(bestSopScore>=2 && bestSopScore>=bestCallScore) return {type:'sop', record:bestSop};
+  if(bestCallScore>=2) return {type:'call', record:bestCall};
+  return null;
+}
+
+// ---- Chat UI ----
+function escapeVasuki(s){ const d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
+function toggleVasuki(force){
+  const panel = document.getElementById('vasukiPanel');
+  const open = force!==undefined ? force : !panel.classList.contains('open');
+  panel.classList.toggle('open', open);
+  const ping = document.getElementById('vasukiPing'); if(ping) ping.style.display = open ? 'none' : 'block';
+  if(open && !panel.dataset.greeted){
+    panel.dataset.greeted='1';
+    appendVasukiMsg('bot', `Hi${currentUser?', '+currentUser.name.split(' ')[0]:''}! I'm Vasuki 🐍 — ask me where something lives in the portal, or describe an issue and I'll check past calls and SOPs for a resolution.`);
+  }
+}
+function vasukiAsk(text){ document.getElementById('vasukiInput').value = text; vasukiSend(); }
+function appendVasukiMsg(who, html){
+  const wrap = document.getElementById('vasukiMsgs');
+  const div = document.createElement('div');
+  div.className = 'vmsg '+who;
+  div.innerHTML = html;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+  return div;
+}
+function vasukiSend(){
+  const input = document.getElementById('vasukiInput');
+  const text = input.value.trim();
+  if(!text) return;
+  appendVasukiMsg('user', escapeVasuki(text));
+  input.value='';
+  AppLogger.info('Vasuki question asked', {q:text});
+  const typing = appendVasukiMsg('bot','<div class="vasuki-typing"><span></span><span></span><span></span></div>');
+  setTimeout(()=>{ typing.remove(); vasukiRespond(text); }, 450+Math.random()*350);
+}
+let _vasukiPendingNav = null;
+function vasukiRespond(query){
+  const faq = matchFaq(query);
+  if(faq){ appendVasukiMsg('bot', faq.a); return; }
+  const nav = matchNav(query);
+  if(nav){
+    _vasukiPendingNav = nav;
+    appendVasukiMsg('bot', `Follow me — I know exactly where that is! 🐍<br><button class="nav-cta" onclick="vasukiGuideToLastMatch()">Take me to ${escapeVasuki(nav.label)}</button>`);
+    setTimeout(()=>{ if(_vasukiPendingNav===nav) vasukiGuideToLastMatch(); }, 900);
+    return;
+  }
+  const kb = searchKnowledgeBase(query);
+  if(kb){ presentKbAnswer(kb); return; }
+  appendVasukiMsg('bot', `🐍 I couldn't find a specific match. Try naming a module directly (like "SOPs" or "open calls"), or describe the actual issue you're facing and I'll check past calls for a similar resolution.`);
+}
+function presentKbAnswer(kb){
+  if(kb.type==='sop'){
+    const s = kb.record;
+    const raw = s.text || s.description || '';
+    const snippet = raw.slice(0,220);
+    appendVasukiMsg('bot', `<span class="vcreature">🦉</span>I found something in the SOPs that might help.
+      <div class="kb-card">
+        <div class="kb-title">${escapeVasuki(s.title||'Untitled SOP')}</div>
+        <div class="kb-meta">${escapeVasuki(s.category||'')} · added by ${escapeVasuki(s.addedBy||'—')}</div>
+        <div class="kb-body">${escapeVasuki(snippet)}${raw.length>220?'…':''}</div>
+        <button class="nav-cta" onclick="vasukiOpenSop(${s.id})">📖 Open full SOP</button>
+      </div>`);
+  } else {
+    const c = kb.record;
+    appendVasukiMsg('bot', `<span class="vcreature">🐝</span>A similar case has been handled before — here's what worked.
+      <div class="kb-card">
+        <div class="kb-title">${escapeVasuki(c.customer||'')} — ${escapeVasuki((c.issue||'').slice(0,60))}</div>
+        <div class="kb-meta">${escapeVasuki(c.platform||'')}${c.systemType?' · '+escapeVasuki(c.systemType):''} · ${escapeVasuki(c.status||'')} · ${escapeVasuki(c.reportDate||c.logDate||'')}</div>
+        <div class="kb-body"><strong>Root cause:</strong> ${escapeVasuki(c.rootCause||'—')}<br><strong>Resolution:</strong> ${escapeVasuki(c.resolution||c.analysis||'—')}</div>
+        <button class="nav-cta" onclick="vasukiOpenCall(${c.id})">🔍 View this call</button>
+      </div>`);
+  }
+}
+function vasukiOpenSop(id){
+  showTab('sops');
+  setTimeout(()=>{ if(typeof viewSOPText==='function') viewSOPText(id); }, 150);
+  toggleVasuki(false);
+}
+function vasukiOpenCall(id){
+  showTab('allCalls');
+  setTimeout(()=>{ if(typeof showDetailModal==='function') showDetailModal(id); }, 150);
+  toggleVasuki(false);
+}
+
+// ---- The snake itself: slithers to a nav item, then coils like a king cobra ----
+function vasukiGuideToLastMatch(){
+  if(!_vasukiPendingNav) return;
+  const nav = _vasukiPendingNav;
+  _vasukiPendingNav = null;
+  const el = document.querySelector('[data-tab="'+nav.tab+'"]');
+  if(!el || el.offsetParent===null){
+    appendVasukiMsg('bot', `🐍 I know where that is, but your current role doesn't have access to it. Ask your admin (Pawan) if you think that's wrong.`);
+    return;
+  }
+  sendSnakeTo(el, nav.label, ()=>{ showTab(nav.tab); if(nav.after) nav.after(); });
+}
+function sendSnakeTo(targetEl, label, onArrive){
+  const launcher = document.getElementById('vasukiLauncher');
+  const startRect = launcher.getBoundingClientRect();
+  const endRect = targetEl.getBoundingClientRect();
+  const startX = startRect.left + startRect.width/2, startY = startRect.top + startRect.height/2;
+  const endX = endRect.left + 26, endY = endRect.top + endRect.height/2;
+
+  const snake = document.getElementById('snakeGuide');
+  snake.classList.add('active');
+  snake.style.transform = `translate(${startX}px, ${startY}px)`;
+
+  const bend = (Math.random()>0.5) ? 55 : -55;
+  const midX1 = startX + (endX-startX)*0.33 + bend, midY1 = startY + (endY-startY)*0.33;
+  const midX2 = startX + (endX-startX)*0.66 - bend, midY2 = startY + (endY-startY)*0.66;
+
+  const anim = snake.animate([
+    {transform:`translate(${startX}px, ${startY}px)`},
+    {transform:`translate(${midX1}px, ${midY1}px)`},
+    {transform:`translate(${midX2}px, ${midY2}px)`},
+    {transform:`translate(${endX}px, ${endY}px)`}
+  ], {duration:1100, easing:'ease-in-out', fill:'forwards'});
+
+  anim.onfinish = ()=>{
+    snake.classList.remove('active');
+    const coil = document.getElementById('cobraCoil');
+    document.getElementById('cobraLabel').textContent = label;
+    coil.style.left = (endRect.left + endRect.width/2 - 20)+'px';
+    coil.style.top = Math.max(8, endRect.top - 8)+'px';
+    coil.classList.add('show');
+    coil.onclick = ()=>{ coil.classList.remove('show'); if(onArrive) onArrive(); };
+    targetEl.classList.add('nav-guided-pulse');
+    targetEl.scrollIntoView({behavior:'smooth', block:'center'});
+    setTimeout(()=>targetEl.classList.remove('nav-guided-pulse'), 4000);
+    setTimeout(()=>{ coil.classList.remove('show'); }, 6000);
+  };
+}
+
 </script>
 </body>
 </html>
